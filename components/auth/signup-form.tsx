@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Lock, Mail, User, Building } from "lucide-react"
+import { connectReactDebugChannelForHtmlRequest } from "next/dist/server/dev/debug-channel"
 
 export function SignupForm() {
   const router = useRouter()
@@ -33,7 +34,6 @@ export function SignupForm() {
 
       // Generate API key
       const apiKey = generateApiKey()
-
       // Sign up with Supabase Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,

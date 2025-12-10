@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Work Tree Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"], input[type="number"] {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="number"] {
+            flex: 0 0 150px;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .visualization {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-height: 600px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .breadcrumb-item {
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .breadcrumb-item:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: #333;
+            cursor: default;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+        }
+
+        .view-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .view-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .group-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .group-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .group-card-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .group-icon {
+            font-size: 28px;
+            margin-right: 12px;
+        }
+
+        .group-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .group-card-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .group-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .group-stat {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .group-stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .group-stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .task-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .task-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .task-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .task-category {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .summary-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .commits-list {
+            margin: 20px 0;
+        }
+
+        .commit-item {
+            padding: 15px;
+            background: white;
+            border-left: 4px solid #667eea;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .commit-hash {
+            font-family: monospace;
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .modal-loading {
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌳 Git Work Tree Analyzer</h1>
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="repoUrl" 
+                    placeholder="GitHub Repository URL (예: https://github.com/user/repo)"
+                    value="https://github.com/torvalds/linux"
+                >
+                <input 
+                    type="number" 
+                    id="maxCommits" 
+                    placeholder="Max Commits"
+                    value="20"
+                    min="5"
+                    max="50"
+                >
+                <button id="analyzeBtn" onclick="analyzeRepository()">분석 시작</button>
+            </div>
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+
+        <div class="visualization">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Repository를 분석 중입니다... 잠시만 기다려주세요.</p>
+            </div>
+
+            <div id="content-container" style="display: none;">
+                <!-- Breadcrumb navigation -->
+                <div id="breadcrumb" class="breadcrumb" style="display: none;"></div>
+
+                <!-- Content will be dynamically inserted here -->
+                <div id="main-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 작업 상세 정보 모달 -->
+    <div id="taskDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTaskName">작업 상세 정보</h2>
+                <button class="close-btn" onclick="closeTaskDetail()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <div class="modal-loading">
+                    <div class="spinner"></div>
+                    <p>작업 정보를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workTree = null;
+        let currentRepoUrl = '';
+        let navigationStack = [];  // 네비게이션 히스토리
+
+        const categoryColors = {
+            'feature': '#10b981',
+            'bugfix': '#f59e0b',
+            'refactor': '#8b5cf6',
+            'docs': '#06b6d4',
+            'test': '#ec4899',
+            'config': '#6366f1',
+            'other': '#6b7280'
+        };
+
+        const categoryIcons = {
+            'feature': '✨',
+            'bugfix': '🐛',
+            'refactor': '♻️',
+            'docs': '📝',
+            'test': '✅',
+            'config': '⚙️',
+            'other': '📦'
+        };
+
+        async function analyzeRepository() {
+            const repoUrl = document.getElementById('repoUrl').value.trim();
+            const maxCommits = parseInt(document.getElementById('maxCommits').value);
+            const statusDiv = document.getElementById('status');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            const contentContainer = document.getElementById('content-container');
+
+            if (!repoUrl) {
+                showStatus('Repository URL을 입력해주세요.', 'error');
+                return;
+            }
+
+            // UI 업데이트
+            analyzeBtn.disabled = true;
+            loading.style.display = 'block';
+            contentContainer.style.display = 'none';
+            showStatus('분석을 시작합니다...', 'info');
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        repo_url: repoUrl,
+                        max_commits: maxCommits
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+
+                workTree = data.work_tree;
+                currentRepoUrl = repoUrl;
+                navigationStack = [];
+                showStatus(`분석 완료! ${data.total_commits}개의 커밋에서 ${Object.keys(workTree.nodes).length}개의 작업을 발견했습니다.`, 'success');
+
+                // 카드 기반 UI로 시각화
+                showOverview();
+
+            } catch (error) {
+                showStatus(`오류: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                analyzeBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        function showOverview() {
+            const contentContainer = document.getElementById('content-container');
+            const breadcrumb = document.getElementById('breadcrumb');
+            const mainContent = document.getElementById('main-content');
+
+            contentContainer.style.display = 'block';
+            breadcrumb.style.display = 'none';  // 최상위에서는 breadcrumb 숨김
+
+            // 최상위 그룹 노드 찾기 (부모가 없는 그룹 노드들)
+            const topLevelGroups = findTopLevelGroups();
+
+            mainContent.innerHTML = `
+                <h2 class="view-title">📊 작업 그룹 개요</h2>
+                <p class="view-subtitle">프로젝트의 주요 작업 그룹들을 확인하세요. 그룹을 클릭하면 세부 작업들을 볼 수 있습니다.</p>
+                <div class="groups-grid" id="groups-container"></div>
+            `;
+
+            const groupsContainer = document.getElementById('groups-container');
+
+            if (topLevelGroups.length === 0) {
+                groupsContainer.innerHTML = '<p style="text-align: center; color: #666;">그룹이 없습니다. 모든 작업을 표시합니다.</p>';
+                // 그룹이 없으면 모든 작업 표시
+                showAllTasks();
+                return;
+            }
+
+            topLevelGroups.forEach(group => {
+                groupsContainer.appendChild(createGroupCard(group));
+            });
+        }
+
+        function findTopLevelGroups() {
+            const groups = [];
+            const childIds = new Set();
+
+            // 모든 자식 노드 ID 수집
+            workTree.relationships.forEach(rel => {
+                if (rel.type === 'parent') {
+                    childIds.add(rel.to);
+                }
+            });
+
+            // 그룹 노드 중 부모가 없는 것들 찾기
+            Object.values(workTree.nodes).forEach(node => {
+                const isGroup = node.commit_hashes && node.commit_hashes.length === 0;
+                if (isGroup && !childIds.has(node.id)) {
+                    groups.push(node);
+                }
+            });
+
+            return groups;
+        }
+
+        function createGroupCard(group) {
+            const card = document.createElement('div');
+            card.className = 'group-card';
+            card.onclick = () => showGroupDetails(group);
+
+            const stats = group.stats || {};
+            const icon = categoryIcons[group.category] || '📦';
+
+            card.innerHTML = `
+                <div class="group-card-header">
+                    <span class="group-icon">${icon}</span>
+                    <div class="group-card-title">${group.task_name}</div>
+                </div>
+                <div class="group-card-description">${group.task_description}</div>
+                <div class="group-stats">
+                    <div class="group-stat">
+                        <div class="group-stat-value">${stats.total_tasks || 0}</div>
+                        <div class="group-stat-label">작업 수</div>
+                    </div>
+                    <div class="group-stat">
+                        <div class="group-stat-value">${stats.total_commits || 0}</div>
+                        <div class="group-stat-label">커밋 수</div>
+                    </div>
+                    <div class="group-stat">
+                        <div class="group-stat-value">+${stats.insertions || 0}</div>
+                        <div class="group-stat-label">추가 라인</div>
+                    </div>
+                    <div class="group-stat">
+                        <div class="group-stat-value">-${stats.deletions || 0}</div>
+                        <div class="group-stat-label">삭제 라인</div>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function showGroupDetails(group) {
+            navigationStack.push({ type: 'group', data: group });
+            updateBreadcrumb();
+
+            const mainContent = document.getElementById('main-content');
+            const icon = categoryIcons[group.category] || '📦';
+
+            // 이 그룹의 자식 작업들 찾기
+            const childTasks = findChildTasks(group.id);
+            const subGroups = childTasks.filter(t => t.commit_hashes && t.commit_hashes.length === 0);
+            const regularTasks = childTasks.filter(t => t.commit_hashes && t.commit_hashes.length > 0);
+
+            let html = `
+                <h2 class="view-title">${icon} ${group.task_name}</h2>
+                <p class="view-subtitle">${group.task_description}</p>
+            `;
+
+            // 하위 그룹이 있으면 먼저 표시
+            if (subGroups.length > 0) {
+                html += `
+                    <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #333;">📦 하위 그룹</h3>
+                    <div class="groups-grid" id="subgroups-container"></div>
+                `;
+            }
+
+            // 일반 작업들
+            if (regularTasks.length > 0) {
+                html += `
+                    <h3 style="margin: 20px 0 15px 0; font-size: 18px; color: #333;">📋 작업 목록</h3>
+                    <div class="tasks-list" id="tasks-container"></div>
+                `;
+            }
+
+            mainContent.innerHTML = html;
+
+            // 하위 그룹 렌더링
+            if (subGroups.length > 0) {
+                const subgroupsContainer = document.getElementById('subgroups-container');
+                subGroups.forEach(sg => {
+                    subgroupsContainer.appendChild(createGroupCard(sg));
+                });
+            }
+
+            // 작업 렌더링
+            if (regularTasks.length > 0) {
+                const tasksContainer = document.getElementById('tasks-container');
+                regularTasks.forEach(task => {
+                    tasksContainer.appendChild(createTaskCard(task));
+                });
+            }
+        }
+
+        function findChildTasks(groupId) {
+            const childIds = [];
+            workTree.relationships.forEach(rel => {
+                if (rel.type === 'parent' && rel.from === groupId) {
+                    childIds.push(rel.to);
+                }
+            });
+
+            return childIds.map(id => workTree.nodes[id]).filter(n => n);
+        }
+
+        function createTaskCard(task) {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.onclick = () => showTaskDetail(task);
+
+            const categoryColor = categoryColors[task.category] || categoryColors.other;
+            const icon = categoryIcons[task.category] || '📦';
+            const commitCount = task.commit_hashes ? task.commit_hashes.length : 0;
+
+            card.innerHTML = `
+                <div class="task-card-header">
+                    <div class="task-title">${icon} ${task.task_name}</div>
+                    <span class="task-category" style="background: ${categoryColor}20; color: ${categoryColor};">
+                        ${task.category}
+                    </span>
+                </div>
+                <div class="task-description">${task.task_description}</div>
+                <div class="task-meta">
+                    <div class="task-meta-item">
+                        <span>📝</span>
+                        <span>${commitCount}개 커밋</span>
+                    </div>
+                    ${commitCount > 0 ? '<div class="task-meta-item"><span>💡</span><span>클릭하여 상세 정보 보기</span></div>' : ''}
+                </div>
+            `;
+
+            return card;
+        }
+
+        function showAllTasks() {
+            const mainContent = document.getElementById('main-content');
+
+            // 그룹이 아닌 모든 작업들
+            const allTasks = Object.values(workTree.nodes).filter(n =>
+                n.commit_hashes && n.commit_hashes.length > 0
+            );
+
+            mainContent.innerHTML = `
+                <h2 class="view-title">📋 모든 작업</h2>
+                <p class="view-subtitle">총 ${allTasks.length}개의 작업</p>
+                <div class="tasks-list" id="all-tasks-container"></div>
+            `;
+
+            const container = document.getElementById('all-tasks-container');
+            allTasks.forEach(task => {
+                container.appendChild(createTaskCard(task));
+            });
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+
+            if (navigationStack.length === 0) {
+                breadcrumb.style.display = 'none';
+                return;
+            }
+
+            breadcrumb.style.display = 'flex';
+
+            let html = `
+                <span class="breadcrumb-item" onclick="goToOverview()">🏠 개요</span>
+            `;
+
+            navigationStack.forEach((item, index) => {
+                html += `<span class="breadcrumb-separator">›</span>`;
+                if (index === navigationStack.length - 1) {
+                    html += `<span class="breadcrumb-item active">${item.data.task_name}</span>`;
+                } else {
+                    html += `<span class="breadcrumb-item" onclick="goToLevel(${index})">${item.data.task_name}</span>`;
+                }
+            });
+
+            breadcrumb.innerHTML = html;
+        }
+
+        function goToOverview() {
+            navigationStack = [];
+            showOverview();
+        }
+
+        function goToLevel(level) {
+            navigationStack = navigationStack.slice(0, level + 1);
+            const item = navigationStack[level];
+            if (item.type === 'group') {
+                showGroupDetails(item.data);
+            }
+        }
+
+
+        async function showTaskDetail(taskData) {
+            const modal = document.getElementById('taskDetailModal');
+            const modalBody = document.getElementById('modalBody');
+            const modalTaskName = document.getElementById('modalTaskName');
+
+            // 모달 표시
+            modal.style.display = 'block';
+            modalTaskName.textContent = taskData.task_name;
+
+            // 로딩 표시
+            modalBody.innerHTML = `
+                <div class="modal-loading">
+                    <div class="spinner"></div>
+                    <p>작업 정보를 분석하는 중...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/task-detail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        repo_url: currentRepoUrl,
+                        commit_hashes: taskData.commit_hashes,
+                        task_name: taskData.task_name
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to load task details');
+                }
+
+                // 상세 정보 표시
+                modalBody.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">+${data.stats.insertions}</div>
+                            <div class="stat-label">추가된 라인</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">-${data.stats.deletions}</div>
+                            <div class="stat-label">삭제된 라인</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${data.stats.files_changed}</div>
+                            <div class="stat-label">변경된 파일</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${data.commits.length}</div>
+                            <div class="stat-label">커밋 수</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 20px;">📝 작업 요약</h3>
+                    <div class="summary-section">
+                        ${data.summary}
+                    </div>
+
+                    <h3>📋 관련 커밋</h3>
+                    <div class="commits-list">
+                        ${data.commits.map(commit => `
+                            <div class="commit-item">
+                                <div style="margin-bottom: 8px;">
+                                    <span class="commit-hash">${commit.hash}</span>
+                                    <span style="color: #888; font-size: 12px; margin-left: 10px;">${new Date(commit.date).toLocaleDateString('ko-KR')}</span>
+                                </div>
+                                <div style="margin-bottom: 5px;">${commit.message}</div>
+                                <div style="font-size: 12px; color: #666;">
+                                    by ${commit.author} |
+                                    <span style="color: #10b981;">+${commit.stats.insertions}</span>
+                                    <span style="color: #ef4444;">-${commit.stats.deletions}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+            } catch (error) {
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #d32f2f;">
+                        <p>❌ 오류: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeTaskDetail() {
+            document.getElementById('taskDetailModal').style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('taskDetailModal');
+            if (event.target === modal) {
+                closeTaskDetail();
+            }
+        }
+
+        // 페이지 로드시 health check
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                if (!data.api_key_configured) {
+                    showStatus('경고: ANTHROPIC_API_KEY가 설정되지 않았습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('Health check failed:', error);
+            }
+        });
+    </script>
+</body>
+</html>

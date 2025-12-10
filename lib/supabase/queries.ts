@@ -73,7 +73,69 @@ export async function getProjectStatistics(
   userId: string,
   supabase: SupabaseClient
 ): Promise<{ data: ProjectStatistics[] | null; error: any }> {
+  console.log(userId)
   return await supabase.rpc('get_project_statistics', {
     p_user_id: userId
   });
+}
+
+/**
+ * 프로젝트 커밋 데이터 타입
+ */
+export interface ProjectCommit {
+  id: number;
+  message: string | null;
+  commit_hash: string;
+  short_hash: string;
+  committed_at: string;
+  prompt_text: string | null;
+  claude_session_id: string | null;
+  files_changed: number;
+  insertions: number;
+  deletions: number;
+}
+
+/**
+ * 프로젝트별 커밋 목록 조회
+ *
+ * @param projectId - 프로젝트 ID
+ * @param userId - 사용자 UUID
+ * @param supabase - Supabase 클라이언트 인스턴스
+ * @returns 프로젝트의 커밋 목록
+ */
+export async function getProjectCommits(
+  projectId: number,
+  userId: string,
+  supabase: SupabaseClient
+): Promise<{ data: ProjectCommit[] | null; error: any }> {
+  return await supabase
+    .from('commits')
+    .select('id, message, commit_hash, short_hash, committed_at, prompt_text, claude_session_id, files_changed, insertions, deletions')
+    .eq('repo_id', projectId)
+    .eq('user_id', userId)
+    .order('committed_at', { ascending: false });
+}
+
+/**
+ * 프로젝트 정보 조회
+ */
+export interface ProjectInfo {
+  id: number;
+  repo_name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getProjectInfo(
+  projectId: number,
+  userId: string,
+  supabase: SupabaseClient
+): Promise<{ data: ProjectInfo | null; error: any }> {
+  return await supabase
+    .from('repositories')
+    .select('id, repo_name, description, created_at, updated_at')
+    .eq('id', projectId)
+    .eq('user_id', userId)
+    .single();
 }

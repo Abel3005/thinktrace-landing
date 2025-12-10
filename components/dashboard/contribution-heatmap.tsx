@@ -128,7 +128,7 @@ export function ContributionHeatmap({ data, stats }: ContributionHeatmapProps) {
               <div className="relative h-4 pl-6 mb-1">
                 <div className="flex gap-1">
                   {monthLabels.map((month, idx) => {
-                    const marginLeft = idx === 0 ? 0 : (month.colIndex - monthLabels[idx - 1].colIndex) * 16;
+                    const marginLeft = idx === 0 ? 0 : (month.colIndex - monthLabels[idx - 1].colIndex) * 7.5;
                     return (
                       <div
                         key={month.colIndex}
@@ -149,13 +149,13 @@ export function ContributionHeatmap({ data, stats }: ContributionHeatmapProps) {
               <div className="flex gap-1">
                 {/* 요일 레이블 */}
                 <div className="flex flex-col gap-1 text-[10px] text-muted-foreground justify-around pr-1">
-                  <div className="h-3">월</div>
+                  <div className="h-3">주</div>
                   <div className="h-3"></div>
-                  <div className="h-3">수</div>
+                  <div className="h-3">화</div>
                   <div className="h-3"></div>
-                  <div className="h-3">금</div>
+                  <div className="h-3">목</div>
                   <div className="h-3"></div>
-                  <div className="h-3"></div>
+                  <div className="h-3">토</div>
                 </div>
 
                 {/* 주별 열 */}

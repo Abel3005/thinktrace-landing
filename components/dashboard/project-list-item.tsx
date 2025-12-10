@@ -1,8 +1,12 @@
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card"
-import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Download, Loader2 } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
 
 export interface ProjectStatistics {
   repo_id: number;
@@ -22,12 +26,40 @@ interface ProjectListItemProps {
 }
 
 export function ProjectListItem({ project }: ProjectListItemProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const lastUpdated = formatDistanceToNow(new Date(project.updated_at), {
     addSuffix: true,
     locale: ko
   });
 
   const netChanges = project.total_insertions - project.total_deletions;
+
+  const handleDownload = async () => {
+    try {
+      setIsDownloading(true);
+      const response = await fetch(`/api/download-codetracker?projectId=${project.repo_id}`);
+
+      if (!response.ok) {
+        throw new Error('다운로드에 실패했습니다');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('다운로드 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <Card className="border-border/50 bg-card/50 hover:bg-card/70 transition-colors">
@@ -51,6 +83,25 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
                 </p>
               </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="shrink-0"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="hidden sm:inline">다운로드 중...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">CodeTracker</span>
+                </>
+              )}
+            </Button>
           </div>
 
           {/* 통계 그리드 */}

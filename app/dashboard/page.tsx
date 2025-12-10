@@ -33,7 +33,7 @@ export default async function DashboardPage() {
   // Transform and prepare data
   const contributions = contributionData ? transformContributionData(contributionData) : []
   const projects = projectData || []
-
+  console.log(projects)
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader user={userData} />
@@ -49,8 +49,8 @@ export default async function DashboardPage() {
           <ContributionHeatmap data={contributions} stats={stats} />
 
           {/* 프로젝트 리스트 */}
-          <ProjectList projects={projects} />
-
+          <ProjectList projects={projects} userId={authUser.id} />
+          
           
         </div>
       </main>

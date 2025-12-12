@@ -3,14 +3,13 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Copy, Eye, EyeOff, Key } from "lucide-react"
+import { Copy, Key } from "lucide-react"
 
 interface ApiKeyCardProps {
   apiKey: string | null | undefined
 }
 
 export function ApiKeyCard({ apiKey }: ApiKeyCardProps) {
-  const [isVisible, setIsVisible] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -20,10 +19,12 @@ export function ApiKeyCard({ apiKey }: ApiKeyCardProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // 마스킹된 키를 카드 크기에 맞게 표시
+  // 처음 8자 + 중간 생략 + 마지막 4자 형식
   const displayKey = apiKey
-    ? isVisible
-      ? apiKey
-      : `${apiKey.substring(0, 8)}${"•".repeat(apiKey.length - 8)}`
+    ? apiKey.length > 20
+      ? `${apiKey.substring(0, 8)}${"•".repeat(16)}${apiKey.substring(apiKey.length - 4)}`
+      : `${apiKey.substring(0, 8)}${"•".repeat(Math.max(0, apiKey.length - 8))}`
     : "키를 불러올 수 없습니다"
 
   return (
@@ -40,11 +41,16 @@ export function ApiKeyCard({ apiKey }: ApiKeyCardProps) {
           <div className="flex-1 space-y-2">
             <p className="text-sm text-muted-foreground">인증 키</p>
             <div className="flex items-center gap-2">
-              <code className="block flex-1 rounded-md bg-muted/50 px-3 py-2 font-mono text-sm">{displayKey}</code>
-              <Button variant="ghost" size="icon" onClick={() => setIsVisible(!isVisible)} disabled={!apiKey}>
-                {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!apiKey}>
+              <code className="block flex-1 rounded-md bg-muted/50 px-3 py-2 font-mono text-sm truncate">
+                {displayKey}
+              </code>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopy}
+                disabled={!apiKey}
+                title="API 키 복사"
+              >
                 <Copy className="h-4 w-4" />
               </Button>
             </div>

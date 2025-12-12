@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     // 프로젝트 조회 (사용자 소유 확인)
     const { data: project } = await supabase
       .from('repositories')
-      .select('id, repo_name')
+      .select('id, repo_name, repo_hash')
       .eq('id', projectId)
       .eq('user_id', user.id)
       .single();
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     credentials.email = userData.email;
     // 프로젝트 ID를 UUID 형식으로 변환 (또는 그대로 사용)
     // TODO: 나중에 repositories 테이블에 project_hash 필드 추가
-    credentials.current_project_hash = `project-${project.id}`;
+    credentials.current_project_hash = project.repo_hash;
 
     // 수정된 credentials.json으로 교체
     zip.file('.codetracker/credentials.json', JSON.stringify(credentials, null, 2));

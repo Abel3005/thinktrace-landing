@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -111,7 +111,14 @@ export function AddProjectDialog({ userId }: AddProjectDialogProps) {
               취소
             </Button>
             <Button type="submit" disabled={loading || !formData.name.trim()}>
-              {loading ? "생성 중..." : "프로젝트 추가"}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  생성 중...
+                </>
+              ) : (
+                "프로젝트 추가"
+              )}
             </Button>
           </DialogFooter>
         </form>

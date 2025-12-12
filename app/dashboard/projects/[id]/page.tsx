@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
-import { getProjectInfo, getProjectCommits } from '@/lib/supabase/queries';
-import { DashboardHeader } from '@/components/dashboard/header';
+import { getProjectInfo, getProjectInteractions } from '@/lib/supabase/queries';
+import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { ProjectDetailContent } from '@/components/dashboard/project-detail-content';
 
 export default async function ProjectDetailPage({
@@ -50,8 +50,8 @@ export default async function ProjectDetailPage({
     redirect('/dashboard');
   }
 
-  // 프로젝트 커밋 가져오기
-  const { data: commits, error: commitsError } = await getProjectCommits(
+  // 프로젝트 AI Interactions 가져오기
+  const { data: interactions, error: interactionsError } = await getProjectInteractions(
     projectId,
     authUser.id,
     supabase
@@ -63,7 +63,8 @@ export default async function ProjectDetailPage({
       <main className="container mx-auto px-4 py-8">
         <ProjectDetailContent
           project={projectInfo}
-          commits={commits || []}
+          interactions={interactions || []}
+          apiKey={userData.api_key}
         />
       </main>
     </div>

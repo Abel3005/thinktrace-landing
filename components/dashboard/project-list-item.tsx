@@ -7,10 +7,12 @@ import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export interface ProjectStatistics {
   repo_id: number;
   repo_name: string;
+  repo_hash: string;
   description: string | null;
   commit_count: number;
   interaction_count: number;
@@ -35,7 +37,10 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
 
   const netChanges = project.total_insertions - project.total_deletions;
 
-  const handleDownload = async () => {
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     try {
       setIsDownloading(true);
       const response = await fetch(`/api/download-codetracker?projectId=${project.repo_id}`);
@@ -62,8 +67,9 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
   };
 
   return (
-    <Card className="border-border/50 bg-card/50 hover:bg-card/70 transition-colors">
-      <CardContent className="p-6">
+    <Link href={`/dashboard/projects/${project.repo_id}`} className="block">
+      <Card className="border-border/50 bg-card/50 hover:bg-card/70 transition-colors cursor-pointer">
+        <CardContent className="p-6">
         <div className="flex flex-col gap-4">
           {/* 헤더 */}
           <div className="flex items-start justify-between gap-4">
@@ -168,5 +174,6 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
         </div>
       </CardContent>
     </Card>
+    </Link>
   );
 }

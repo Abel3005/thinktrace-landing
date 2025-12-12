@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { LogOut, Code2 } from "lucide-react"
+import { LogOut, Code2, Loader2 } from "lucide-react"
+import { useState } from "react"
 
 interface DashboardHeaderProps {
   user: {
@@ -14,12 +15,19 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleSignOut = async () => {
-    const supabase = getSupabaseBrowserClient()
-    await supabase.auth.signOut()
-    router.push("/login")
-    router.refresh()
+    setIsLoggingOut(true)
+    try {
+      const supabase = getSupabaseBrowserClient()
+      await supabase.auth.signOut()
+      router.push("/login")
+      router.refresh()
+    } catch (error) {
+      console.error("로그아웃 오류:", error)
+      setIsLoggingOut(false)
+    }
   }
 
   return (
@@ -34,8 +42,17 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             <p className="font-medium">{user?.username}</p>
             <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSignOut}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="mr-2 h-4 w-4" />
+            )}
             로그아웃
           </Button>
         </div>

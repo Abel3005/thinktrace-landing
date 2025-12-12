@@ -18,6 +18,7 @@ export interface ContributionData {
 export interface ProjectStatistics {
   repo_id: number;
   repo_name: string;
+  repo_hash: string;
   description: string | null;
   commit_count: number;
   interaction_count: number;
@@ -73,7 +74,6 @@ export async function getProjectStatistics(
   userId: string,
   supabase: SupabaseClient
 ): Promise<{ data: ProjectStatistics[] | null; error: any }> {
-  console.log(userId)
   return await supabase.rpc('get_project_statistics', {
     p_user_id: userId
   });
@@ -138,4 +138,43 @@ export async function getProjectInfo(
     .eq('id', projectId)
     .eq('user_id', userId)
     .single();
+}
+
+/**
+ * AI Interaction 데이터 타입
+ */
+export interface AIInteraction {
+  id: number;
+  repo_id: number;
+  user_id: string;
+  pre_commit_id: number;
+  post_commit_id: number;
+  prompt_text: string;
+  claude_session_id: string | null;
+  started_at: string;
+  ended_at: string | null;
+  duration_seconds: number | null;
+  files_modified: number;
+  created_at: string;
+}
+
+/**
+ * 프로젝트별 AI Interactions 조회
+ *
+ * @param projectId - 프로젝트 ID
+ * @param userId - 사용자 UUID
+ * @param supabase - Supabase 클라이언트 인스턴스
+ * @returns 프로젝트의 AI interaction 목록
+ */
+export async function getProjectInteractions(
+  projectId: number,
+  userId: string,
+  supabase: SupabaseClient
+): Promise<{ data: AIInteraction[] | null; error: any }> {
+  return await supabase
+    .from('ai_interactions')
+    .select('*')
+    .eq('repo_id', projectId)
+    .eq('user_id', userId)
+    .order('started_at', { ascending: false });
 }

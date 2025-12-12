@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { Lock, Mail, User, Building } from "lucide-react"
-import { connectReactDebugChannelForHtmlRequest } from "next/dist/server/dev/debug-channel"
+import { Lock, Mail, User, Building, Loader2 } from "lucide-react"
 
 export function SignupForm() {
   const router = useRouter()
@@ -146,7 +145,14 @@ export function SignupForm() {
           </div>
           {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "가입 중..." : "회원가입"}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                가입 중...
+              </>
+            ) : (
+              "회원가입"
+            )}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm text-muted-foreground">

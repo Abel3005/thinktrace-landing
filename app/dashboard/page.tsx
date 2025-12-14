@@ -18,17 +18,18 @@ export default async function DashboardPage() {
     redirect("/login")
   }
 
-  // Fetch user data from custom users table
-  const { data: userData } = await supabase.from("users").select("*").eq("id", authUser.id).single()
-
-  // Fetch user statistics
-  const { data: stats } = await supabase.from("user_statistics").select("*").eq("user_id", authUser.id).single()
-
-  // Fetch contribution data (최근 365일)
-  const { data: contributionData } = await getContributionData(authUser.id, supabase)
-
-  // Fetch project statistics
-  const { data: projectData } = await getProjectStatistics(authUser.id, supabase)
+  // 모든 데이터를 병렬로 fetch (성능 최적화)
+  const [
+    { data: userData },
+    { data: stats },
+    { data: contributionData },
+    { data: projectData },
+  ] = await Promise.all([
+    supabase.from("users").select("*").eq("id", authUser.id).single(),
+    supabase.from("user_statistics").select("*").eq("user_id", authUser.id).single(),
+    getContributionData(authUser.id, supabase),
+    getProjectStatistics(authUser.id, supabase),
+  ])
 
   // Transform and prepare data
   const contributions = contributionData ? transformContributionData(contributionData) : []

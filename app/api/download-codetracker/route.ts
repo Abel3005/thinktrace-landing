@@ -180,8 +180,15 @@ export async function GET(request: NextRequest) {
       platform: isWindows ? 'DOS' : 'UNIX',
     });
 
-    // 파일명 생성
-    const filename = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}_${platform}.zip`;
+    // 파일명 생성 (브라우저 차단 방지를 위해 OS 이름 대신 약어 사용)
+    const platformShort: Record<Platform, string> = {
+      'darwin-amd64': 'mac_intel',
+      'darwin-arm64': 'mac_m',
+      'linux-amd64': 'linux',
+      'linux-arm64': 'linux_arm',
+      'windows-amd64': 'win',
+    };
+    const filename = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}_${platformShort[platform]}.zip`;
 
     // 응답 헤더 설정 및 zip 파일 반환
     return new NextResponse(new Uint8Array(zipBuffer), {

@@ -6,8 +6,9 @@ import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Do
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { detectPlatform, type Platform } from '@/lib/platform'
 
 export interface ProjectStatistics {
   repo_id: number;
@@ -29,6 +30,14 @@ interface ProjectListItemProps {
 
 export function ProjectListItem({ project }: ProjectListItemProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [platform, setPlatform] = useState<Platform | null>(null);
+
+  useEffect(() => {
+    const detected = detectPlatform();
+    if (detected) {
+      setPlatform(detected.platform);
+    }
+  }, []);
 
   const lastUpdated = formatDistanceToNow(new Date(project.updated_at), {
     addSuffix: true,
@@ -41,19 +50,26 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!platform) {
+      alert('플랫폼을 감지할 수 없습니다. 프로젝트 상세 페이지에서 직접 선택해주세요.');
+      return;
+    }
+
     try {
       setIsDownloading(true);
-      const response = await fetch(`/api/download-codetracker?projectId=${project.repo_id}`);
+      const response = await fetch(`/api/download-codetracker?projectId=${project.repo_id}&platform=${platform}`);
 
       if (!response.ok) {
         throw new Error('다운로드에 실패했습니다');
       }
 
       const blob = await response.blob();
+      const filename = response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
+        || `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}_${platform}.zip`;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}.zip`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

@@ -8,18 +8,21 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-border/50 bg-card/30 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Code2 className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">ThinkTrace</h1>
-          </div>
-          <div className="flex gap-2">
+          </Link>
+          <nav className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <Link href="/guide">설치 가이드</Link>
+            </Button>
             <Button variant="ghost" asChild>
               <Link href="/login">로그인</Link>
             </Button>
             <Button asChild>
               <Link href="/signup">시작하기</Link>
             </Button>
-          </div>
+          </nav>
         </div>
       </header>
 

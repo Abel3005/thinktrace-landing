@@ -3,15 +3,70 @@ import { getSupabaseServerClient } from '@/lib/supabase/server';
 import JSZip from 'jszip';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import type { Platform } from '@/lib/platform';
+
+const VALID_PLATFORMS: Platform[] = [
+  'darwin-amd64',
+  'darwin-arm64',
+  'linux-amd64',
+  'linux-arm64',
+  'windows-amd64',
+];
+
+function getSettingsForPlatform(platform: Platform): object {
+  const isWindows = platform === 'windows-amd64';
+  const ext = isWindows ? '.exe' : '';
+  const pathSep = isWindows ? '\\\\' : '/';
+
+  const hookPath = (name: string) =>
+    isWindows
+      ? `.claude${pathSep}hooks${pathSep}${name}${ext}`
+      : `.claude/hooks/${name}`;
+
+  return {
+    hooks: {
+      UserPromptSubmit: [
+        {
+          matcher: "",
+          hooks: [
+            {
+              type: "command",
+              command: hookPath('user_prompt_submit')
+            }
+          ]
+        }
+      ],
+      Stop: [
+        {
+          matcher: "",
+          hooks: [
+            {
+              type: "command",
+              command: hookPath('stop')
+            }
+          ]
+        }
+      ]
+    }
+  };
+}
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const projectId = searchParams.get('projectId');
+    const platform = searchParams.get('platform') as Platform | null;
 
     if (!projectId) {
       return NextResponse.json(
         { error: 'Project ID is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!platform || !VALID_PLATFORMS.includes(platform)) {
+      return NextResponse.json(
+        { error: 'Valid platform is required', validPlatforms: VALID_PLATFORMS },
         { status: 400 }
       );
     }
@@ -58,54 +113,83 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 원본 zip 파일 읽기
-    const zipPath = path.join(process.cwd(), 'tmp', 'codetracker_install.zip');
-    const zipBuffer = await readFile(zipPath);
+    // 새 zip 파일 생성
+    const zip = new JSZip();
 
-    // JSZip으로 zip 파일 로드
-    const zip = await JSZip.loadAsync(zipBuffer);
+    // .codetracker 폴더 생성
+    const codetrackerFolder = zip.folder('.codetracker');
 
-    // credentials.json 파일 읽기 및 수정
-    const credentialsFile = zip.file('.codetracker/credentials.json');
+    // config.json 읽기 (원본 zip에서)
+    const originalZipPath = path.join(process.cwd(), 'tmp', 'codetracker_install.zip');
+    const originalZipBuffer = await readFile(originalZipPath);
+    const originalZip = await JSZip.loadAsync(originalZipBuffer);
 
-    if (!credentialsFile) {
+    const configFile = originalZip.file('.codetracker/config.json');
+    if (configFile) {
+      const configContent = await configFile.async('string');
+      codetrackerFolder?.file('config.json', configContent);
+    }
+
+    // credentials.json 생성
+    const credentials = {
+      api_key: userData.api_key,
+      username: userData.username,
+      email: userData.email,
+      current_project_hash: project.repo_hash,
+    };
+    codetrackerFolder?.file('credentials.json', JSON.stringify(credentials, null, 2));
+
+    // .claude 폴더 생성
+    const claudeFolder = zip.folder('.claude');
+    const hooksFolder = claudeFolder?.folder('hooks');
+
+    // 플랫폼별 settings.json 생성
+    const settings = getSettingsForPlatform(platform);
+    claudeFolder?.file('settings.json', JSON.stringify(settings, null, 2));
+
+    // 플랫폼별 바이너리 추가
+    const isWindows = platform === 'windows-amd64';
+    const ext = isWindows ? '.exe' : '';
+    const distDir = path.join(process.cwd(), 'dist', platform);
+
+    try {
+      // user_prompt_submit 바이너리
+      const userPromptBinary = await readFile(path.join(distDir, `user_prompt_submit${ext}`));
+      hooksFolder?.file(`user_prompt_submit${ext}`, userPromptBinary, {
+        unixPermissions: isWindows ? undefined : '755',
+      });
+
+      // stop 바이너리
+      const stopBinary = await readFile(path.join(distDir, `stop${ext}`));
+      hooksFolder?.file(`stop${ext}`, stopBinary, {
+        unixPermissions: isWindows ? undefined : '755',
+      });
+    } catch (binaryError) {
+      console.error(`Error reading binaries for platform ${platform}:`, binaryError);
       return NextResponse.json(
-        { error: 'credentials.json not found in zip file' },
+        { error: `Binaries not found for platform: ${platform}` },
         { status: 500 }
       );
     }
 
-    const credentialsContent = await credentialsFile.async('string');
-    const credentials = JSON.parse(credentialsContent);
-
-    // API 키 및 프로젝트 해시 업데이트
-    credentials.api_key = userData.api_key;
-    credentials.username = userData.username;
-    credentials.email = userData.email;
-    // 프로젝트 ID를 UUID 형식으로 변환 (또는 그대로 사용)
-    // TODO: 나중에 repositories 테이블에 project_hash 필드 추가
-    credentials.current_project_hash = project.repo_hash;
-
-    // 수정된 credentials.json으로 교체
-    zip.file('.codetracker/credentials.json', JSON.stringify(credentials, null, 2));
-
-    // 새로운 zip 파일 생성
-    const modifiedZipBuffer = await zip.generateAsync({
+    // zip 파일 생성
+    const zipBuffer = await zip.generateAsync({
       type: 'nodebuffer',
       compression: 'DEFLATE',
-      compressionOptions: { level: 9 }
+      compressionOptions: { level: 9 },
+      platform: isWindows ? 'DOS' : 'UNIX',
     });
 
     // 파일명 생성
-    const filename = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}.zip`;
+    const filename = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}_${platform}.zip`;
 
     // 응답 헤더 설정 및 zip 파일 반환
-    return new NextResponse(modifiedZipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': modifiedZipBuffer.length.toString(),
+        'Content-Length': zipBuffer.length.toString(),
       },
     });
   } catch (error) {

@@ -3,32 +3,40 @@
 import { cn } from "@/lib/utils"
 import { File } from "lucide-react"
 
-interface DiffLine {
+export interface DiffLine {
   type: "context" | "insert" | "delete" | "replace-old" | "replace-new";
   old_line_num: number | null;
   new_line_num: number | null;
   content: string;
 }
 
-interface DiffHunk {
-  old_start: number;
-  old_lines: number;
-  new_start: number;
-  new_lines: number;
+export interface DiffHunk {
   lines: DiffLine[];
 }
 
-interface FileDiff {
+export interface FileChange {
+  change_type: string;
   file_path: string;
   hunks: DiffHunk[];
 }
 
-interface DiffViewerProps {
-  diffs: FileDiff[];
+export interface DiffViewerProps {
+  fileChanges: FileChange[] | null;
 }
 
-export function DiffViewer({ diffs }: DiffViewerProps) {
-  if (!diffs || diffs.length === 0) {
+export function DiffViewer({ fileChanges }: DiffViewerProps) {
+  // structured_diff가 null인 경우 (비동기 처리 진행 중)
+  if (fileChanges === null) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <File className="h-12 w-12 mx-auto mb-4 opacity-50 animate-pulse" />
+        <p className="font-medium">파일 비교를 진행 중입니다</p>
+        <p className="text-xs mt-2">추가 및 삭제 내용을 분석하고 있습니다.</p>
+      </div>
+    );
+  }
+
+  if (fileChanges.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -39,20 +47,20 @@ export function DiffViewer({ diffs }: DiffViewerProps) {
 
   return (
     <div className="space-y-6">
-      {diffs.map((fileDiff, fileIdx) => (
-        <FileDiffView key={fileIdx} fileDiff={fileDiff} />
+      {fileChanges.map((fileChange, fileIdx) => (
+        <FileChangeView key={fileIdx} fileChange={fileChange} />
       ))}
     </div>
   );
 }
 
-function FileDiffView({ fileDiff }: { fileDiff: FileDiff }) {
-  const totalAdditions = fileDiff.hunks.reduce(
+function FileChangeView({ fileChange }: { fileChange: FileChange }) {
+  const totalAdditions = fileChange.hunks.reduce(
     (sum, hunk) => sum + hunk.lines.filter(l => l.type === "insert" || l.type === "replace-new").length,
     0
   );
 
-  const totalDeletions = fileDiff.hunks.reduce(
+  const totalDeletions = fileChange.hunks.reduce(
     (sum, hunk) => sum + hunk.lines.filter(l => l.type === "delete" || l.type === "replace-old").length,
     0
   );
@@ -63,7 +71,7 @@ function FileDiffView({ fileDiff }: { fileDiff: FileDiff }) {
       <div className="bg-muted/50 px-4 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
           <File className="h-4 w-4 text-muted-foreground" />
-          <span className="font-mono text-sm font-medium">{fileDiff.file_path}</span>
+          <span className="font-mono text-sm font-medium">{fileChange.file_path}</span>
         </div>
         <div className="flex items-center gap-3 text-xs">
           {totalAdditions > 0 && (
@@ -77,7 +85,7 @@ function FileDiffView({ fileDiff }: { fileDiff: FileDiff }) {
 
       {/* Diff 내용 */}
       <div className="font-mono text-xs overflow-x-auto">
-        {fileDiff.hunks.map((hunk, hunkIdx) => (
+        {fileChange.hunks.map((hunk, hunkIdx) => (
           <HunkView key={hunkIdx} hunk={hunk} />
         ))}
       </div>
@@ -88,17 +96,9 @@ function FileDiffView({ fileDiff }: { fileDiff: FileDiff }) {
 function HunkView({ hunk }: { hunk: DiffHunk }) {
   return (
     <div>
-      {/* Hunk 헤더 */}
-      <div className="bg-accent/10 px-4 py-2 text-accent-foreground border-y border-border/50">
-        @@ -{hunk.old_start},{hunk.old_lines} +{hunk.new_start},{hunk.new_lines} @@
-      </div>
-
-      {/* Lines */}
-      <div>
-        {hunk.lines.map((line, lineIdx) => (
-          <DiffLineView key={lineIdx} line={line} />
-        ))}
-      </div>
+      {hunk.lines.map((line, lineIdx) => (
+        <DiffLineView key={lineIdx} line={line} />
+      ))}
     </div>
   );
 }

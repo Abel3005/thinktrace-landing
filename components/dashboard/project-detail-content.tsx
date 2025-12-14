@@ -2,27 +2,25 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Sparkles, Clock, MessageSquare, FileEdit, Loader2, X } from "lucide-react"
-import { formatDistanceToNow, format } from 'date-fns'
+import { ArrowLeft, Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, Lock, Crown } from "lucide-react"
+import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
-import { DiffViewer } from './diff-viewer'
+import { WorkTreeView } from './work-tree-view'
+import { InteractionListView } from './interaction-list-view'
+import { DownloadButton } from './download-button'
 
 interface ProjectDetailContentProps {
   project: ProjectInfo;
   interactions: AIInteraction[];
   apiKey: string;
+  isPremium?: boolean;
 }
 
-interface FileDiff {
-  file_path: string;
-  hunks: any[];
-}
-
-export function ProjectDetailContent({ project, interactions, apiKey }: ProjectDetailContentProps) {
-  const [selectedInteraction, setSelectedInteraction] = useState<AIInteraction | null>(null);
+export function ProjectDetailContent({ project, interactions, apiKey, isPremium = false }: ProjectDetailContentProps) {
+  const [showRecentFilesModal, setShowRecentFilesModal] = useState(false);
 
   // 전체 통계 계산
   const stats = {
@@ -52,6 +50,7 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
             <p className="text-muted-foreground mt-1">{project.description}</p>
           )}
         </div>
+        <DownloadButton projectId={project.id} projectName={project.repo_name} />
       </div>
 
       {/* 통계 카드 */}
@@ -70,7 +69,10 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50">
+        <Card
+          className="border-border/50 bg-card/50 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md"
+          onClick={() => setShowRecentFilesModal(true)}
+        >
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
@@ -99,115 +101,97 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
         </Card>
       </div>
 
-      {/* AI Interactions 목록 */}
+      {/* AI 작업 내역 */}
       <Card className="border-border/50 bg-card/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            AI 작업 내역
+            {isPremium ? '작업 트리' : 'AI 작업 내역'}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            AI와의 상호작용 기록입니다. 클릭하면 프롬프트와 변경사항을 확인할 수 있습니다.
+            {isPremium
+              ? 'AI가 추론한 작업 그룹별로 상호작용 기록을 확인할 수 있습니다.'
+              : 'AI와의 상호작용 기록입니다. 클릭하면 프롬프트와 변경사항을 확인할 수 있습니다.'}
           </p>
         </CardHeader>
         <CardContent>
-          {interactions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>아직 AI 작업이 없습니다.</p>
-            </div>
+          {isPremium ? (
+            <WorkTreeView
+              projectId={project.id}
+              interactions={interactions}
+              apiKey={apiKey}
+            />
           ) : (
-            <div className="space-y-3">
-              {interactions.map((interaction) => (
-                <InteractionCard
-                  key={interaction.id}
-                  interaction={interaction}
-                  onClick={() => setSelectedInteraction(interaction)}
-                />
-              ))}
+            <div className="space-y-4">
+              {/* 프리미엄 안내 배너 */}
+              <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/20">
+                    <Crown className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold mb-1 flex items-center gap-2">
+                      작업 트리로 더 스마트하게 관리하세요
+                      <Lock className="h-4 w-4 text-muted-foreground" />
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      프리미엄으로 업그레이드하면 AI가 자동으로 분석한 작업 그룹별로 코드 변경사항을 관리할 수 있습니다.
+                    </p>
+                    <Button size="sm" className="bg-primary hover:bg-primary/90">
+                      <Crown className="h-4 w-4 mr-2" />
+                      프리미엄 살펴보기
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 기존 AI Interactions 리스트 */}
+              <InteractionListView
+                interactions={interactions}
+                apiKey={apiKey}
+              />
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 상세 모달 */}
-      {selectedInteraction && (
-        <InteractionDetailModal
-          interaction={selectedInteraction}
+      {/* 최근 변경된 파일 모달 */}
+      {showRecentFilesModal && (
+        <RecentFilesModal
+          projectId={project.id}
           apiKey={apiKey}
-          onClose={() => setSelectedInteraction(null)}
+          onClose={() => setShowRecentFilesModal(false)}
         />
       )}
     </div>
   );
 }
 
-interface InteractionCardProps {
-  interaction: AIInteraction;
-  onClick: () => void;
-}
-
-function InteractionCard({ interaction, onClick }: InteractionCardProps) {
-  const timeAgo = formatDistanceToNow(new Date(interaction.started_at), {
-    addSuffix: true,
-    locale: ko,
-  });
-
-  return (
-    <div
-      className="border border-border/50 rounded-lg p-4 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md bg-card"
-      onClick={onClick}
-    >
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <Sparkles className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm mb-2 line-clamp-2">
-            {interaction.prompt_text}
-          </p>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {timeAgo}
-            </span>
-            {interaction.duration_seconds && (
-              <>
-                <span>•</span>
-                <span>{interaction.duration_seconds}초</span>
-              </>
-            )}
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <FileEdit className="h-3 w-3" />
-              {interaction.files_modified}개 파일
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface InteractionDetailModalProps {
-  interaction: AIInteraction;
+interface RecentFilesModalProps {
+  projectId: number;
   apiKey: string;
   onClose: () => void;
 }
 
-function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDetailModalProps) {
-  const [diffs, setDiffs] = useState<FileDiff[] | null>(null);
+interface RecentFileItem {
+  file_path: string;
+  last_modified: string;
+  change_count: number;
+  last_change_type: string;
+}
+
+function RecentFilesModal({ projectId, apiKey, onClose }: RecentFilesModalProps) {
+  const [files, setFiles] = useState<RecentFileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Diff 데이터 로드
   useEffect(() => {
-    const fetchDiff = async () => {
+    const fetchRecentFiles = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetch(
-          `http://localhost:5000/api/interactions/${interaction.id}/diff`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/projects/${projectId}/recent-files?limit=10`,
           {
             headers: {
               'X-API-Key': `${apiKey}`,
@@ -216,22 +200,20 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
           }
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch diff');
+          throw new Error('Failed to fetch recent files');
         }
         const data = await response.json();
-        setDiffs(Array.isArray(data) ? data : [data]);
+        setFiles(data);
       } catch (err) {
-        console.error('Error fetching diff:', err);
-        setError('변경사항을 불러오는데 실패했습니다.');
+        console.error('Error fetching recent files:', err);
+        setError('최근 파일을 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDiff();
-  }, [interaction.id, apiKey]);
-
-  const startedDate = format(new Date(interaction.started_at), 'yyyy-MM-dd HH:mm:ss', { locale: ko });
+    fetchRecentFiles();
+  }, [projectId, apiKey]);
 
   return (
     <div
@@ -239,28 +221,18 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
       onClick={onClose}
     >
       <div
-        className="bg-card border-2 border-border rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+        className="bg-card border-2 border-border rounded-lg w-full max-w-3xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 모달 헤더 */}
         <div className="bg-card border-b border-border p-6 flex items-start justify-between shrink-0">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="h-5 w-5 text-primary" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+              <FileEdit className="h-5 w-5 text-accent-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold mb-2">AI 작업 상세</h2>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                <span>{startedDate}</span>
-                {interaction.duration_seconds && (
-                  <>
-                    <span>•</span>
-                    <span>{interaction.duration_seconds}초 소요</span>
-                  </>
-                )}
-                <span>•</span>
-                <span>{interaction.files_modified}개 파일 수정</span>
-              </div>
+              <h2 className="text-xl font-bold mb-1">최근 변경된 파일</h2>
+              <p className="text-sm text-muted-foreground">최근 수정된 파일 목록입니다</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0">
@@ -269,39 +241,70 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
         </div>
 
         {/* 모달 내용 */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* 프롬프트 */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              사용자 프롬프트
-            </h3>
-            <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {interaction.prompt_text}
-              </p>
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">파일 목록을 불러오는 중...</span>
             </div>
-          </div>
-
-          {/* 변경사항 */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <FileEdit className="h-5 w-5" />
-              파일 변경사항
-            </h3>
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-3 text-muted-foreground">변경사항을 불러오는 중...</span>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12 text-red-500">
-                <p>{error}</p>
-              </div>
-            ) : diffs ? (
-              <DiffViewer diffs={diffs} />
-            ) : null}
-          </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500">
+              <p>{error}</p>
+            </div>
+          ) : files.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <FileEdit className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>변경된 파일이 없습니다.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {files.map((file, idx) => (
+                <div
+                  key={idx}
+                  className="border border-border/50 rounded-lg p-4 bg-card/50 hover:bg-card transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="font-mono text-sm font-medium truncate">
+                          {file.file_path}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatDistanceToNow(new Date(file.last_modified), {
+                            addSuffix: true,
+                            locale: ko,
+                          })}
+                        </span>
+                        <span>•</span>
+                        <span>{file.change_count}회 수정</span>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          file.last_change_type === 'A'
+                            ? 'bg-green-500/10 text-green-500'
+                            : file.last_change_type === 'D'
+                            ? 'bg-red-500/10 text-red-500'
+                            : 'bg-blue-500/10 text-blue-500'
+                        }`}
+                      >
+                        {file.last_change_type === 'A'
+                          ? '추가'
+                          : file.last_change_type === 'D'
+                          ? '삭제'
+                          : '수정'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

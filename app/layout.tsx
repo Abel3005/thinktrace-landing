@@ -10,7 +10,6 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "ThinkTrace - AI 기반 코드 추적 플랫폼",
   description: "ThinkTrace로 AI 기반 코드 변경 사항을 추적하고 관리하세요",
-  generator: "v0.app",
   icons: {
     icon: [
       {

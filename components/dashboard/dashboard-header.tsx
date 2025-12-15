@@ -4,8 +4,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { LogOut, Code2, Loader2, BookOpen } from "lucide-react"
+import { LogOut, Loader2, BookOpen } from "lucide-react"
 import { useState } from "react"
+import { ThinkTraceLogoMinimal } from "@/components/logo"
 
 interface DashboardHeaderProps {
   user: {
@@ -35,7 +36,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
     <header className="border-b border-border/50 bg-card/30 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Code2 className="h-6 w-6 text-primary" />
+          <ThinkTraceLogoMinimal size={28} />
           <h1 className="text-xl font-bold">ThinkTrace</h1>
         </Link>
         <div className="flex items-center gap-4">

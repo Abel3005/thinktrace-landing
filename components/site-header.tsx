@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Code2, LayoutDashboard } from "lucide-react"
+import { LayoutDashboard } from "lucide-react"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
+import { ThinkTraceLogoMinimal } from "@/components/logo"
 
 export async function SiteHeader() {
   const supabase = await getSupabaseServerClient()
@@ -12,7 +13,7 @@ export async function SiteHeader() {
     <header className="border-b border-border/50 bg-card/30 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Code2 className="h-6 w-6 text-primary" />
+          <ThinkTraceLogoMinimal size={28} />
           <h1 className="text-xl font-bold">ThinkTrace</h1>
         </Link>
         <nav className="flex items-center gap-2">

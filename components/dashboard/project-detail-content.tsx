@@ -2,24 +2,21 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, Lock, Crown } from "lucide-react"
+import { ArrowLeft, Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, Construction } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
-import { WorkTreeView } from './work-tree-view'
-import { InteractionListView } from './interaction-list-view'
 import { DownloadButton } from './download-button'
 
 interface ProjectDetailContentProps {
   project: ProjectInfo;
   interactions: AIInteraction[];
   apiKey: string;
-  isPremium?: boolean;
 }
 
-export function ProjectDetailContent({ project, interactions, apiKey, isPremium = false }: ProjectDetailContentProps) {
+export function ProjectDetailContent({ project, interactions, apiKey }: ProjectDetailContentProps) {
   const [showRecentFilesModal, setShowRecentFilesModal] = useState(false);
 
   // 전체 통계 계산
@@ -101,57 +98,28 @@ export function ProjectDetailContent({ project, interactions, apiKey, isPremium 
         </Card>
       </div>
 
-      {/* AI 작업 내역 */}
+      {/* 작업 그룹 기반 보고서 */}
       <Card className="border-border/50 bg-card/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            {isPremium ? '작업 트리' : 'AI 작업 내역'}
+            작업 트리
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            {isPremium
-              ? 'AI가 추론한 작업 그룹별로 상호작용 기록을 확인할 수 있습니다.'
-              : 'AI와의 상호작용 기록입니다. 클릭하면 프롬프트와 변경사항을 확인할 수 있습니다.'}
+            AI가 추론한 작업 그룹별로 상호작용 기록을 확인할 수 있습니다.
           </p>
         </CardHeader>
         <CardContent>
-          {isPremium ? (
-            <WorkTreeView
-              projectId={project.id}
-              interactions={interactions}
-              apiKey={apiKey}
-            />
-          ) : (
-            <div className="space-y-4">
-              {/* 프리미엄 안내 배너 */}
-              <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/20">
-                    <Crown className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold mb-1 flex items-center gap-2">
-                      작업 트리로 더 스마트하게 관리하세요
-                      <Lock className="h-4 w-4 text-muted-foreground" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      프리미엄으로 업그레이드하면 AI가 자동으로 분석한 작업 그룹별로 코드 변경사항을 관리할 수 있습니다.
-                    </p>
-                    <Button size="sm" className="bg-primary hover:bg-primary/90">
-                      <Crown className="h-4 w-4 mr-2" />
-                      프리미엄 살펴보기
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* 기존 AI Interactions 리스트 */}
-              <InteractionListView
-                interactions={interactions}
-                apiKey={apiKey}
-              />
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50 mb-4">
+              <Construction className="h-8 w-8 text-muted-foreground" />
             </div>
-          )}
+            <h3 className="text-lg font-semibold mb-2">준비중입니다</h3>
+            <p className="text-sm text-muted-foreground max-w-md">
+              작업 그룹 기반의 보고서 기능을 준비하고 있습니다.<br />
+              곧 AI가 분석한 작업 그룹별로 코드 변경사항을 확인하실 수 있습니다.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

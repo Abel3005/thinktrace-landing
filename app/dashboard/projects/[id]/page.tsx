@@ -65,7 +65,6 @@ export default async function ProjectDetailPage({
           project={projectInfo}
           interactions={interactions || []}
           apiKey={userData.api_key}
-          isPremium={userData.is_premium || false}
         />
       </main>
     </div>

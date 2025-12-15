@@ -94,7 +94,6 @@ export default async function AdminProjectDetailPage({ params }: AdminProjectDet
           project={projectInfo}
           interactions={interactions || []}
           apiKey={userData.api_key}
-          isPremium={userData.is_premium || false}
           userId={userId}
         />
       </main>

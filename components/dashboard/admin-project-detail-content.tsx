@@ -1,12 +1,13 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, Construction } from "lucide-react"
+import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { useState, useEffect } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
+import { InteractionListView } from './interaction-list-view'
 
 interface AdminProjectDetailContentProps {
   project: ProjectInfo;
@@ -103,16 +104,10 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
           </p>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50 mb-4">
-              <Construction className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">준비중입니다</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              작업 그룹 기반의 보고서 기능을 준비하고 있습니다.<br />
-              곧 AI가 분석한 작업 그룹별로 코드 변경사항을 확인하실 수 있습니다.
-            </p>
-          </div>
+          <InteractionListView
+            interactions={interactions}
+            apiKey={apiKey}
+          />
         </CardContent>
       </Card>
 

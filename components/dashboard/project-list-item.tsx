@@ -2,13 +2,14 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Download, Loader2 } from "lucide-react"
+import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Download } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { detectPlatform, type Platform } from '@/lib/platform'
+import { DownloadModal } from './download-modal'
 
 export interface ProjectStatistics {
   repo_id: number;
@@ -29,8 +30,8 @@ interface ProjectListItemProps {
 }
 
 export function ProjectListItem({ project }: ProjectListItemProps) {
-  const [isDownloading, setIsDownloading] = useState(false);
   const [platform, setPlatform] = useState<Platform | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const detected = detectPlatform();
@@ -46,7 +47,7 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
 
   const netChanges = project.total_insertions - project.total_deletions;
 
-  const handleDownload = async (e: React.MouseEvent) => {
+  const handleDownload = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -55,34 +56,11 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
       return;
     }
 
-    try {
-      setIsDownloading(true);
-      const response = await fetch(`/api/download-codetracker?projectId=${project.repo_id}&platform=${platform}`);
-
-      if (!response.ok) {
-        throw new Error('다운로드에 실패했습니다');
-      }
-
-      const blob = await response.blob();
-      const filename = response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
-        || `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}_${platform}.zip`;
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Download error:', error);
-      alert('다운로드 중 오류가 발생했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsDownloading(false);
-    }
+    setModalOpen(true);
   };
 
   return (
+    <>
     <Link href={`/dashboard/projects/${project.repo_id}`} className="block">
       <Card className="border-border/50 bg-card/50 hover:bg-card/70 transition-colors cursor-pointer">
         <CardContent className="p-6">
@@ -94,7 +72,18 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
                 <FolderGit2 className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg truncate">{project.repo_name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-lg truncate">{project.repo_name}</h3>
+                  {project.interaction_count > 1 ? (
+                    <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
+                      테스트 완료
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                      테스트 전
+                    </span>
+                  )}
+                </div>
                 {project.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                     {project.description}
@@ -109,20 +98,10 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
               variant="outline"
               size="sm"
               onClick={handleDownload}
-              disabled={isDownloading}
               className="shrink-0"
             >
-              {isDownloading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="hidden sm:inline">다운로드 중...</span>
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline">CodeTracker</span>
-                </>
-              )}
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">CodeTracker</span>
             </Button>
           </div>
 
@@ -191,5 +170,16 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
       </CardContent>
     </Card>
     </Link>
+
+    {platform && (
+      <DownloadModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        projectId={project.repo_id}
+        projectName={project.repo_name}
+        platform={platform}
+      />
+    )}
+    </>
   );
 }

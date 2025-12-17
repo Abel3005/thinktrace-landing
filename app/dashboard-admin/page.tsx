@@ -1,5 +1,4 @@
-import { getSupabaseServerClient, getSupabaseAdminClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { getSupabaseAdminClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -33,15 +32,6 @@ interface UserWithStats extends User {
 }
 
 export default async function AdminDashboardPage() {
-  const supabase = await getSupabaseServerClient()
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser()
-
-  if (!authUser) {
-    redirect("/login")
-  }
-
   // 관리자 클라이언트로 모든 사용자 데이터 조회 (RLS 우회)
   const adminClient = getSupabaseAdminClient()
 

@@ -1,5 +1,5 @@
-import { getSupabaseServerClient, getSupabaseAdminClient } from "@/lib/supabase/server"
-import { redirect, notFound } from "next/navigation"
+import { getSupabaseAdminClient } from "@/lib/supabase/server"
+import { notFound } from "next/navigation"
 import { UserInfo } from "@/components/dashboard/user-info"
 import { AdminProjectList } from "@/components/dashboard/admin-project-list"
 import { getProjectStatistics } from "@/lib/supabase/queries"
@@ -16,16 +16,6 @@ interface AdminUserDetailPageProps {
 
 export default async function AdminUserDetailPage({ params }: AdminUserDetailPageProps) {
   const { userId } = await params
-
-  // 현재 로그인한 사용자 확인 (인증 체크)
-  const supabase = await getSupabaseServerClient()
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser()
-
-  if (!authUser) {
-    redirect("/login")
-  }
 
   // 관리자 클라이언트로 대상 사용자 데이터 조회 (RLS 우회)
   const adminClient = getSupabaseAdminClient()

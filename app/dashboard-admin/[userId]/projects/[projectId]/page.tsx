@@ -1,5 +1,5 @@
-import { redirect, notFound } from 'next/navigation';
-import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server';
+import { notFound } from 'next/navigation';
+import { getSupabaseAdminClient } from '@/lib/supabase/server';
 import { getProjectInfo, getProjectInteractions } from '@/lib/supabase/queries';
 import { AdminProjectDetailContent } from '@/components/dashboard/admin-project-detail-content';
 import Link from 'next/link';
@@ -19,16 +19,6 @@ export default async function AdminProjectDetailPage({ params }: AdminProjectDet
 
   if (isNaN(projectId)) {
     notFound();
-  }
-
-  // 현재 로그인한 사용자 확인 (인증 체크)
-  const supabase = await getSupabaseServerClient();
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-
-  if (!authUser) {
-    redirect('/login');
   }
 
   // 관리자 클라이언트로 대상 사용자 및 프로젝트 데이터 조회 (RLS 우회)

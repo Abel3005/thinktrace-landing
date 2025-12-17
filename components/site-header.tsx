@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { LayoutDashboard } from "lucide-react"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { ThinkTraceLogoMinimal } from "@/components/logo"
+import { LogoutButton } from "@/components/logout-button"
 
 export async function SiteHeader() {
   const supabase = await getSupabaseServerClient()
@@ -21,19 +22,20 @@ export async function SiteHeader() {
             <Link href="/guide">설치 가이드</Link>
           </Button>
           {isLoggedIn ? (
-            <Button asChild>
-              <Link href="/dashboard">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                대시보드
-              </Link>
-            </Button>
+            <>
+              <LogoutButton />
+              <Button asChild>
+                
+                <Link href="/dashboard">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  대시보드
+                </Link>
+              </Button>
+            </>
           ) : (
             <>
               <Button variant="ghost" asChild>
                 <Link href="/login">로그인</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">시작하기</Link>
               </Button>
             </>
           )}

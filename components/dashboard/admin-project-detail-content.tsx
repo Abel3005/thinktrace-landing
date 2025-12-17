@@ -268,7 +268,9 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
       {/* Work-tree 상세 모달 */}
       {selectedWorkTree && (
         <WorkTreeDetailModal
-          workTree={selectedWorkTree}
+          workTreeId={selectedWorkTree.id}
+          createdAt={selectedWorkTree.created_at}
+          apiKey={apiKey}
           onClose={() => setSelectedWorkTree(null)}
         />
       )}
@@ -429,12 +431,117 @@ function RecentFilesModal({ projectId, apiKey, onClose }: RecentFilesModalProps)
   );
 }
 
+interface WorkTreeNode {
+  id: string;
+  task_name: string;
+  task_description: string;
+  category: 'feature' | 'bugfix' | 'refactor' | 'docs';
+  commit_hashes: string[];
+  commit_messages: string[];
+}
+
+interface WorkTreeRelationship {
+  from: string;
+  to: string;
+  type: 'dependency' | 'parent';
+  reason: string;
+}
+
+interface WorkTreeData {
+  nodes: Record<string, WorkTreeNode>;
+  relationships: WorkTreeRelationship[];
+}
+
 interface WorkTreeDetailModalProps {
-  workTree: WorkTreeHistoryItem;
+  workTreeId: number;
+  createdAt: string;
+  apiKey: string;
   onClose: () => void;
 }
 
-function WorkTreeDetailModal({ workTree, onClose }: WorkTreeDetailModalProps) {
+function WorkTreeDetailModal({ workTreeId, createdAt, apiKey, onClose }: WorkTreeDetailModalProps) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [workTreeData, setWorkTreeData] = useState<WorkTreeData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // API에서 work_tree 데이터 가져오기
+  useEffect(() => {
+    const fetchWorkTree = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/work-trees/${workTreeId}`,
+          {
+            headers: {
+              'X-API-Key': apiKey,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch work-tree');
+        }
+        const data = await response.json();
+        // work_tree 필드 파싱
+        const parsedWorkTree = typeof data.work_tree === 'string'
+          ? JSON.parse(data.work_tree)
+          : data.work_tree;
+        setWorkTreeData(parsedWorkTree);
+      } catch (err) {
+        console.error('Error fetching work-tree:', err);
+        setError('Work-tree 데이터를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkTree();
+  }, [workTreeId, apiKey]);
+
+  const toggleGroup = (groupId: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
+    } else {
+      newExpanded.add(groupId);
+    }
+    setExpandedGroups(newExpanded);
+  };
+
+  const getGroupTasks = (groupId: string): WorkTreeNode[] => {
+    if (!workTreeData) return [];
+    return workTreeData.relationships
+      .filter(rel => rel.from === groupId && rel.type === 'parent')
+      .map(rel => workTreeData.nodes[rel.to])
+      .filter(Boolean);
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'feature': return 'text-blue-500 bg-blue-500/10';
+      case 'bugfix': return 'text-red-500 bg-red-500/10';
+      case 'refactor': return 'text-yellow-500 bg-yellow-500/10';
+      case 'docs': return 'text-green-500 bg-green-500/10';
+      default: return 'text-gray-500 bg-gray-500/10';
+    }
+  };
+
+  const groups = workTreeData
+    ? Object.values(workTreeData.nodes).filter(node => node.id.startsWith('group_'))
+    : [];
+
+  const standaloneTasks = workTreeData
+    ? Object.values(workTreeData.nodes).filter(node => {
+        if (node.id.startsWith('group_')) return false;
+        const isChildOfGroup = workTreeData.relationships.some(
+          rel => rel.to === node.id && rel.type === 'parent'
+        );
+        return !isChildOfGroup;
+      })
+    : [];
+
   return (
     <div
       className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
@@ -451,9 +558,9 @@ function WorkTreeDetailModal({ workTree, onClose }: WorkTreeDetailModalProps) {
               <GitBranch className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold mb-1">Work-tree #{workTree.id}</h2>
+              <h2 className="text-xl font-bold mb-1">Work-tree #{workTreeId}</h2>
               <p className="text-sm text-muted-foreground">
-                {format(new Date(workTree.created_at), 'yyyy년 MM월 dd일 HH:mm:ss', { locale: ko })}
+                {format(new Date(createdAt), 'yyyy년 MM월 dd일 HH:mm:ss', { locale: ko })}
               </p>
             </div>
           </div>
@@ -464,13 +571,130 @@ function WorkTreeDetailModal({ workTree, onClose }: WorkTreeDetailModalProps) {
 
         {/* 모달 내용 */}
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="bg-muted/30 rounded-lg p-4 font-mono text-sm overflow-x-auto">
-            <pre className="whitespace-pre-wrap break-words">
-              {typeof workTree.work_tree === 'string'
-                ? workTree.work_tree
-                : JSON.stringify(workTree.work_tree, null, 2)}
-            </pre>
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">Work-tree 데이터를 불러오는 중...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500">
+              <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>{error}</p>
+            </div>
+          ) : !workTreeData ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Work-tree 데이터가 없습니다.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* 작업 그룹 */}
+              {groups.map(group => {
+                const tasks = getGroupTasks(group.id);
+                const isExpanded = expandedGroups.has(group.id);
+
+                return (
+                  <div key={group.id} className="border border-border/50 rounded-lg bg-card/50">
+                    {/* 그룹 헤더 */}
+                    <div
+                      className="p-4 cursor-pointer hover:bg-accent/5 transition-colors"
+                      onClick={() => toggleGroup(group.id)}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                            <GitBranch className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold">{group.task_name}</h3>
+                              <span className={`text-xs px-2 py-0.5 rounded ${getCategoryColor(group.category)}`}>
+                                {group.category}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {group.task_description}
+                            </p>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <span>{tasks.length}개 작업</span>
+                              <span>•</span>
+                              <span>{group.commit_hashes.length}개 커밋</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          {isExpanded ? '접기' : '펼치기'}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* 그룹 내 작업 목록 */}
+                    {isExpanded && tasks.length > 0 && (
+                      <div className="border-t border-border/50 p-4 bg-accent/5 space-y-2">
+                        {tasks.map(task => (
+                          <div
+                            key={task.id}
+                            className="border border-border/50 rounded-lg p-3 bg-card"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{task.task_name}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded ${getCategoryColor(task.category)}`}>
+                                {task.category}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {task.task_description}
+                            </p>
+                            <div className="text-xs text-muted-foreground">
+                              {task.commit_hashes.length}개 커밋
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* 독립 작업 */}
+              {standaloneTasks.length > 0 && (
+                <div className="border border-border/50 rounded-lg bg-card/50 p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    기타 작업
+                  </h3>
+                  <div className="space-y-2">
+                    {standaloneTasks.map(task => (
+                      <div
+                        key={task.id}
+                        className="border border-border/50 rounded-lg p-3 bg-card"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">{task.task_name}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded ${getCategoryColor(task.category)}`}>
+                            {task.category}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {task.task_description}
+                        </p>
+                        <div className="text-xs text-muted-foreground">
+                          {task.commit_hashes.length}개 커밋
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {groups.length === 0 && standaloneTasks.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>분석된 작업이 없습니다.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

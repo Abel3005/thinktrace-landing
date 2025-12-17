@@ -128,31 +128,43 @@ export function DownloadModal({
     try {
       const url = `/api/download-codetracker?projectId=${projectId}&platform=${platform}`
 
-      // 다운로드 시작
+      // Step 1: 파일 생성 (fetch로 서버에서 zip 파일 생성)
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || '파일 생성에 실패했습니다')
+      }
+
+      // Step 2: 다운로드 단계
       setStep('downloading')
 
-      // iframe을 사용한 직접 다운로드
-      const iframe = document.createElement('iframe')
-      iframe.style.display = 'none'
-      iframe.src = url
-      document.body.appendChild(iframe)
+      // blob으로 변환
+      const blob = await response.blob()
 
-      // 다운로드 완료 대기
-      await new Promise<void>((resolve) => {
-        const timeout = setTimeout(() => {
-          resolve()
-        }, 3000)
-
-        iframe.onload = () => {
-          clearTimeout(timeout)
-          resolve()
+      // 파일명 추출
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = `codetracker_${projectName}.zip`
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/)
+        if (match) {
+          filename = match[1]
         }
-      })
+      }
+
+      // 다운로드 링크 생성 및 클릭
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
 
       // 정리
       setTimeout(() => {
-        document.body.removeChild(iframe)
-      }, 5000)
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(downloadUrl)
+      }, 100)
 
       // 완료
       setStep('completed')
@@ -160,7 +172,7 @@ export function DownloadModal({
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다')
       setStep('error')
     }
-  }, [projectId, platform])
+  }, [projectId, platform, projectName])
 
   // 모달이 열리면 자동으로 다운로드 시작
   useEffect(() => {

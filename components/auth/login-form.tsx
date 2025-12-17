@@ -33,8 +33,8 @@ export function LoginForm() {
 
       if (error) throw error
 
-      router.push("/dashboard")
-      router.refresh()
+      // 하드 네비게이션으로 페이지 이동 (macOS 키체인 모달이 제대로 닫히도록)
+      window.location.href = "/dashboard"
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인에 실패했습니다.")
     } finally {

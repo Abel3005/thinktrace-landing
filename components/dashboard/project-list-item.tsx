@@ -2,13 +2,18 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Download } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Download, ChevronDown } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { detectPlatform, type Platform } from '@/lib/platform'
+import { detectPlatform, getAllPlatforms, type Platform } from '@/lib/platform'
 import { DownloadModal } from './download-modal'
 
 export interface ProjectStatistics {
@@ -30,13 +35,14 @@ interface ProjectListItemProps {
 }
 
 export function ProjectListItem({ project }: ProjectListItemProps) {
-  const [platform, setPlatform] = useState<Platform | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const allPlatforms = getAllPlatforms();
 
   useEffect(() => {
     const detected = detectPlatform();
     if (detected) {
-      setPlatform(detected.platform);
+      setSelectedPlatform(detected.platform);
     }
   }, []);
 
@@ -47,22 +53,23 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
 
   const netChanges = project.total_insertions - project.total_deletions;
 
-  const handleDownload = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!platform) {
-      alert('플랫폼을 감지할 수 없습니다. 프로젝트 상세 페이지에서 직접 선택해주세요.');
-      return;
-    }
-
-    setModalOpen(true);
+  const handlePlatformSelect = (platform: Platform) => {
+    setSelectedPlatform(platform);
   };
+
+  const handleDownload = () => {
+    if (selectedPlatform) {
+      setModalOpen(true);
+    }
+  };
+
+  const currentPlatformName = selectedPlatform
+    ? allPlatforms.find(p => p.platform === selectedPlatform)?.displayName
+    : '플랫폼 선택';
 
   return (
     <>
-    <Link href={`/dashboard/projects/${project.repo_id}`} className="block">
-      <Card className="border-border/50 bg-card/50 hover:bg-card/70 transition-colors cursor-pointer">
+      <Card className="border-border/50 bg-card/50">
         <CardContent className="p-6">
         <div className="flex flex-col gap-4">
           {/* 헤더 */}
@@ -94,15 +101,38 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownload}
-              className="shrink-0"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">CodeTracker</span>
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <span className="text-xs text-muted-foreground">{currentPlatformName}</span>
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {allPlatforms.map((p) => (
+                    <DropdownMenuItem
+                      key={p.platform}
+                      onClick={() => handlePlatformSelect(p.platform)}
+                      className={cn(
+                        selectedPlatform === p.platform && "bg-accent"
+                      )}
+                    >
+                      {p.displayName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownload}
+                disabled={!selectedPlatform}
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">다운로드</span>
+              </Button>
+            </div>
           </div>
 
           {/* 통계 그리드 */}
@@ -169,15 +199,14 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
         </div>
       </CardContent>
     </Card>
-    </Link>
 
-    {platform && (
+    {selectedPlatform && (
       <DownloadModal
         open={modalOpen}
         onOpenChange={setModalOpen}
         projectId={project.repo_id}
         projectName={project.repo_name}
-        platform={platform}
+        platform={selectedPlatform}
       />
     )}
     </>

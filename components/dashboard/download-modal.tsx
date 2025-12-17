@@ -126,21 +126,12 @@ export function DownloadModal({
     setError(null)
 
     try {
-      // Step 1: 먼저 유효성 확인 (HEAD 요청)
       const url = `/api/download-codetracker?projectId=${projectId}&platform=${platform}`
-      const checkResponse = await fetch(url, { method: 'HEAD' })
 
-      if (!checkResponse.ok) {
-        // HEAD가 실패하면 GET으로 에러 메시지 확인
-        const errorResponse = await fetch(url)
-        const errorData = await errorResponse.json()
-        throw new Error(errorData.error || '다운로드 실패')
-      }
-
-      // Step 2: 직접 링크로 다운로드 (브라우저 의심 방지)
+      // 다운로드 시작
       setStep('downloading')
 
-      // iframe을 사용한 직접 다운로드 (브라우저가 서버 응답으로 인식)
+      // iframe을 사용한 직접 다운로드
       const iframe = document.createElement('iframe')
       iframe.style.display = 'none'
       iframe.src = url
@@ -148,7 +139,6 @@ export function DownloadModal({
 
       // 다운로드 완료 대기
       await new Promise<void>((resolve) => {
-        // iframe 로드 완료 또는 타임아웃
         const timeout = setTimeout(() => {
           resolve()
         }, 3000)

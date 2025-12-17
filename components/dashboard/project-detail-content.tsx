@@ -1,14 +1,15 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, Construction } from "lucide-react"
+import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
 import { DownloadButton } from './download-button'
+import { WorkTreeView } from './work-tree-view'
 
 interface ProjectDetailContentProps {
   project: ProjectInfo;
@@ -106,29 +107,11 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
       </div>
 
       {/* 작업 그룹 기반 보고서 */}
-      <Card className="border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            작업 트리
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            AI가 추론한 작업 그룹별로 상호작용 기록을 확인할 수 있습니다.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50 mb-4">
-              <Construction className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">준비중입니다</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              작업 그룹 기반의 보고서 기능을 준비하고 있습니다.<br />
-              곧 AI가 분석한 작업 그룹별로 코드 변경사항을 확인하실 수 있습니다.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <WorkTreeView
+        projectId={project.id}
+        interactions={interactions}
+        apiKey={apiKey}
+      />
 
       {/* 최근 변경된 파일 모달 */}
       {showRecentFilesModal && (

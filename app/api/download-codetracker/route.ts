@@ -51,6 +51,45 @@ function getSettingsForPlatform(platform: Platform): object {
   };
 }
 
+// HEAD 요청 처리 (다운로드 전 유효성 확인용)
+export async function HEAD(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const projectId = searchParams.get('projectId');
+    const platform = searchParams.get('platform') as Platform | null;
+
+    if (!projectId || !platform || !VALID_PLATFORMS.includes(platform)) {
+      return new NextResponse(null, { status: 400 });
+    }
+
+    // 인증 확인
+    const supabase = await getSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new NextResponse(null, { status: 401 });
+    }
+
+    // 프로젝트 소유권 확인
+    const { data: project } = await supabase
+      .from('repositories')
+      .select('id')
+      .eq('id', projectId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!project) {
+      return new NextResponse(null, { status: 404 });
+    }
+
+    return new NextResponse(null, { status: 200 });
+  } catch {
+    return new NextResponse(null, { status: 500 });
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -197,6 +236,11 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': zipBuffer.length.toString(),
+        // 브라우저 의심 방지를 위한 추가 헤더
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
   } catch (error) {

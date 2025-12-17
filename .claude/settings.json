@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/user_prompt_submit.js"
+            "command": ".claude/hooks/user_prompt_submit"
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/stop.js"
+            "command": ".claude/hooks/stop"
           }
         ]
       }

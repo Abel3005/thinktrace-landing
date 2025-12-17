@@ -126,29 +126,43 @@ export function DownloadModal({
     setError(null)
 
     try {
-      // Step 1: 파일 생성 요청
+      // Step 1: 먼저 유효성 확인 (HEAD 요청)
       const url = `/api/download-codetracker?projectId=${projectId}&platform=${platform}`
-      const response = await fetch(url)
+      const checkResponse = await fetch(url, { method: 'HEAD' })
 
-      if (!response.ok) {
-        const errorData = await response.json()
+      if (!checkResponse.ok) {
+        // HEAD가 실패하면 GET으로 에러 메시지 확인
+        const errorResponse = await fetch(url)
+        const errorData = await errorResponse.json()
         throw new Error(errorData.error || '다운로드 실패')
       }
 
-      // Step 2: 다운로드
+      // Step 2: 직접 링크로 다운로드 (브라우저 의심 방지)
       setStep('downloading')
 
-      const blob = await response.blob()
-      const filename = response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
-        || `codetracker_${projectName.replace(/[^a-zA-Z0-9]/g, '_')}_${platform}.zip`
+      // iframe을 사용한 직접 다운로드 (브라우저가 서버 응답으로 인식)
+      const iframe = document.createElement('iframe')
+      iframe.style.display = 'none'
+      iframe.src = url
+      document.body.appendChild(iframe)
 
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(link.href)
+      // 다운로드 완료 대기
+      await new Promise<void>((resolve) => {
+        // iframe 로드 완료 또는 타임아웃
+        const timeout = setTimeout(() => {
+          resolve()
+        }, 3000)
+
+        iframe.onload = () => {
+          clearTimeout(timeout)
+          resolve()
+        }
+      })
+
+      // 정리
+      setTimeout(() => {
+        document.body.removeChild(iframe)
+      }, 5000)
 
       // 완료
       setStep('completed')
@@ -156,7 +170,7 @@ export function DownloadModal({
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다')
       setStep('error')
     }
-  }, [projectId, projectName, platform])
+  }, [projectId, platform])
 
   // 모달이 열리면 자동으로 다운로드 시작
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
   FolderTree,
@@ -14,7 +14,8 @@ import {
   Loader2,
   X,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Construction
 } from "lucide-react"
 import { formatDistanceToNow, format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -52,6 +53,7 @@ export function WorkTreeView({ projectId, interactions, apiKey }: WorkTreeViewPr
   const [workTree, setWorkTree] = useState<WorkTreeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
 
@@ -59,6 +61,7 @@ export function WorkTreeView({ projectId, interactions, apiKey }: WorkTreeViewPr
     const fetchWorkTree = async () => {
       setLoading(true);
       setError(null);
+      setNotFound(false);
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/projects/${projectId}/work-tree`,
@@ -69,6 +72,10 @@ export function WorkTreeView({ projectId, interactions, apiKey }: WorkTreeViewPr
             },
           }
         );
+        if (response.status === 404) {
+          setNotFound(true);
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch work tree');
         }
@@ -136,10 +143,43 @@ export function WorkTreeView({ projectId, interactions, apiKey }: WorkTreeViewPr
 
   if (error) {
     return (
-      <div className="text-center py-12 text-red-500">
-        <AlertCircle className="h-12 w-12 mx-auto mb-4" />
-        <p>{error}</p>
-      </div>
+      <Card className="border-border/50 bg-card/50">
+        <CardContent className="p-6">
+          <div className="text-center py-12 text-red-500">
+            <AlertCircle className="h-12 w-12 mx-auto mb-4" />
+            <p>{error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // 404 또는 데이터 없음 - 준비중 플레이스홀더
+  if (notFound || !workTree) {
+    return (
+      <Card className="border-border/50 bg-card/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            작업 트리
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            AI가 추론한 작업 그룹별로 상호작용 기록을 확인할 수 있습니다.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50 mb-4">
+              <Construction className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">준비중입니다</h3>
+            <p className="text-sm text-muted-foreground max-w-md">
+              작업 그룹 기반의 보고서 기능을 준비하고 있습니다.<br />
+              곧 AI가 분석한 작업 그룹별로 코드 변경사항을 확인하실 수 있습니다.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

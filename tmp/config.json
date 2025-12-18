@@ -64,5 +64,9 @@
       "^explain"
     ],
     "only_on_changes": false
+  },
+  "conversation_tracking":{                                                                                                                                   
+      "enabled": true,                                                                                                                                           
+      "max_entries_per_request": 100                                                                                                                             
   }
 }

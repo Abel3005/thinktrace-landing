@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase/server';
+import { lookupRepository } from '@/lib/api/client';
 import type { SimpleOS } from '@/lib/platform';
 
 const VALID_OS: SimpleOS[] = ['mac', 'linux', 'windows'];
@@ -171,7 +172,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // API 키로 사용자 인증 (RLS 우회)
+    // API 키로 사용자 인증 (users 테이블은 Supabase에서 조회)
     const supabase = getSupabaseAdminClient();
     const { data: userData } = await supabase
       .from('users')
@@ -186,13 +187,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 프로젝트 확인 (사용자 소유)
-    const { data: project } = await supabase
-      .from('repositories')
-      .select('id, repo_hash')
-      .eq('repo_hash', projectHash)
-      .eq('user_id', userData.id)
-      .single();
+    // 프로젝트 확인 (External API 사용)
+    const project = await lookupRepository(userData.id, projectHash, undefined, apiKey);
 
     if (!project) {
       return NextResponse.json(

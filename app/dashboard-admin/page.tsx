@@ -1,4 +1,5 @@
 import { getSupabaseAdminClient } from "@/lib/supabase/server"
+import { fetchAllUserStatistics } from "@/lib/api/client"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -17,6 +18,7 @@ interface User {
   email: string
   organization: string | null
   created_at: string
+  api_key: string
 }
 
 interface UserStats {
@@ -32,41 +34,42 @@ interface UserWithStats extends User {
 }
 
 export default async function AdminDashboardPage() {
-  // 관리자 클라이언트로 모든 사용자 데이터 조회 (RLS 우회)
+  // 관리자 클라이언트로 사용자 데이터 조회 (users는 Supabase에서)
   const adminClient = getSupabaseAdminClient()
 
-  // 사용자와 통계 데이터를 병렬로 조회
-  const [usersResponse, statsResponse] = await Promise.all([
-    adminClient
-      .from("users")
-      .select("id, username, email, organization, created_at")
-      .order("created_at", { ascending: false }),
-    adminClient
-      .from("user_statistics")
-      .select("user_id, total_projects, total_snapshots, total_interactions, total_files_changed"),
-  ])
+  const { data: usersData, error: usersError } = await adminClient
+    .from("users")
+    .select("id, username, email, organization, created_at, api_key")
+    .order("created_at", { ascending: false })
 
-  if (usersResponse.error) {
-    console.error("Error fetching users:", usersResponse.error)
-  }
-  if (statsResponse.error) {
-    console.error("Error fetching stats:", statsResponse.error)
+  if (usersError) {
+    console.error("Error fetching users:", usersError)
   }
 
-  const usersData = (usersResponse.data as User[]) || []
-  const statsData = (statsResponse.data as UserStats[]) || []
+  const users = (usersData as User[]) || []
+
+  // 통계 데이터는 External API에서 조회
+  // 첫 번째 관리자 사용자의 API 키를 사용
+  const adminApiKey = users.find(u => u.api_key)?.api_key
+  const statsData = await fetchAllUserStatistics(adminApiKey)
 
   // 통계 데이터를 user_id 기준으로 맵핑
   const statsMap = new Map(statsData.map((s) => [s.user_id, s]))
 
   // 사용자와 통계 데이터 결합
-  const users: UserWithStats[] = usersData.map((user) => ({
+  const usersWithStats: UserWithStats[] = users.map((user) => ({
     ...user,
-    stats: statsMap.get(user.id) || null,
+    stats: statsMap.get(user.id) ? {
+      user_id: user.id,
+      total_projects: statsMap.get(user.id)?.total_projects || 0,
+      total_snapshots: statsMap.get(user.id)?.total_snapshots || 0,
+      total_interactions: statsMap.get(user.id)?.total_interactions || 0,
+      total_files_changed: statsMap.get(user.id)?.total_files_changed || 0,
+    } : null,
   }))
 
   // 전체 통계 계산
-  const totalStats = users.reduce(
+  const totalStats = usersWithStats.reduce(
     (acc, user) => {
       const stats = user.stats
       return {
@@ -174,14 +177,14 @@ export default async function AdminDashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.length === 0 ? (
+                    {usersWithStats.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                           등록된 사용자가 없습니다.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      users.map((user) => {
+                      usersWithStats.map((user) => {
                         const stats = user.stats
                         const createdDate = new Date(user.created_at).toLocaleDateString("ko-KR", {
                           year: "numeric",

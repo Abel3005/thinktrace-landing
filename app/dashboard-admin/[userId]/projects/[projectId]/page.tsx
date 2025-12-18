@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getSupabaseAdminClient } from '@/lib/supabase/server';
-import { getProjectInfo, getProjectInteractions } from '@/lib/supabase/queries';
+import { fetchProjectInfo, fetchProjectInteractions } from '@/lib/api/client';
 import { AdminProjectDetailContent } from '@/components/dashboard/admin-project-detail-content';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -21,10 +21,9 @@ export default async function AdminProjectDetailPage({ params }: AdminProjectDet
     notFound();
   }
 
-  // 관리자 클라이언트로 대상 사용자 및 프로젝트 데이터 조회 (RLS 우회)
+  // 관리자 클라이언트로 대상 사용자 데이터 조회 (users는 Supabase에서)
   const adminClient = getSupabaseAdminClient();
 
-  // 사용자 데이터 가져오기
   const { data: userData, error: userError } = await adminClient
     .from('users')
     .select('*')
@@ -35,25 +34,17 @@ export default async function AdminProjectDetailPage({ params }: AdminProjectDet
     notFound();
   }
 
-  // 프로젝트 정보 가져오기 (userId 검증 포함)
-  const { data: projectInfo, error: projectError } = await adminClient
-    .from('repositories')
-    .select('id, repo_name, description, created_at, updated_at')
-    .eq('id', projectId)
-    .eq('user_id', userId)
-    .single();
+  const apiKey = userData.api_key;
 
-  if (projectError || !projectInfo) {
+  // 프로젝트 정보 및 AI Interactions는 External API에서 조회
+  const [projectInfo, interactions] = await Promise.all([
+    fetchProjectInfo(projectId, userId, apiKey),
+    fetchProjectInteractions(projectId, userId, apiKey),
+  ]);
+
+  if (!projectInfo) {
     notFound();
   }
-
-  // 프로젝트 AI Interactions 가져오기
-  const { data: interactions } = await adminClient
-    .from('ai_interactions')
-    .select('*')
-    .eq('repo_id', projectId)
-    .eq('user_id', userId)
-    .order('started_at', { ascending: false });
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,7 +74,7 @@ export default async function AdminProjectDetailPage({ params }: AdminProjectDet
         <AdminProjectDetailContent
           project={projectInfo}
           interactions={interactions || []}
-          apiKey={userData.api_key}
+          apiKey={apiKey}
           userId={userId}
         />
       </main>

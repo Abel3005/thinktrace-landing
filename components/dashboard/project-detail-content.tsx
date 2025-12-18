@@ -2,14 +2,23 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon } from "lucide-react"
+import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon, Trash2 } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
 import { DownloadButton } from './download-button'
 import { WorkTreeView } from './work-tree-view'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface ProjectDetailContentProps {
   project: ProjectInfo;
@@ -18,7 +27,34 @@ interface ProjectDetailContentProps {
 }
 
 export function ProjectDetailContent({ project, interactions, apiKey }: ProjectDetailContentProps) {
+  const router = useRouter();
   const [showRecentFilesModal, setShowRecentFilesModal] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/projects/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectId: project.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete project');
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('프로젝트 삭제에 실패했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // 전체 통계 계산
   const stats = {
@@ -55,7 +91,20 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
             <p className="text-muted-foreground mt-1">{project.description}</p>
           )}
         </div>
-        <DownloadButton projectId={project.id} projectName={project.repo_name} />
+        <DownloadButton
+          projectId={project.id}
+          projectName={project.repo_name}
+          projectHash={project.repo_hash}
+          apiKey={apiKey}
+        />
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setDeleteDialogOpen(true)}
+          className="text-red-500 hover:text-red-600 hover:border-red-500/50"
+        >
+          <Trash2 className="h-5 w-5" />
+        </Button>
       </div>
 
       {/* 통계 카드 */}
@@ -121,6 +170,43 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
           onClose={() => setShowRecentFilesModal(false)}
         />
       )}
+
+      {/* 프로젝트 삭제 확인 다이얼로그 */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>프로젝트 삭제</DialogTitle>
+            <DialogDescription>
+              <span className="font-semibold text-foreground">{project.repo_name}</span> 프로젝트를 삭제하시겠습니까?
+              <br />
+              <span className="text-red-500">이 작업은 되돌릴 수 없습니다.</span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  삭제 중...
+                </>
+              ) : (
+                '삭제'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

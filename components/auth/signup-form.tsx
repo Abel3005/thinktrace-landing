@@ -38,7 +38,7 @@ export function SignupForm() {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || window.location.origin,
+          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || process.env.NEXT_PUBLIC_BASE_URL,
         },
       })
 
@@ -94,6 +94,7 @@ export function SignupForm() {
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 required
+                autoComplete="off"
                 className="pl-10"
               />
             </div>
@@ -109,6 +110,7 @@ export function SignupForm() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                autoComplete="off"
                 className="pl-10"
               />
             </div>
@@ -125,6 +127,7 @@ export function SignupForm() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={6}
+                autoComplete="off"
                 className="pl-10"
               />
             </div>
@@ -139,6 +142,7 @@ export function SignupForm() {
                 placeholder="회사 또는 조직명"
                 value={formData.organization}
                 onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                autoComplete="off"
                 className="pl-10"
               />
             </div>

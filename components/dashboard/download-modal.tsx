@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,336 +10,268 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import {
-  CheckCircle2,
-  Circle,
-  Loader2,
   Copy,
   Check,
-  FileArchive,
-  Download,
   Terminal,
-  AlertTriangle
+  AlertTriangle,
+  Trash2,
+  Monitor,
+  Apple,
 } from "lucide-react"
+import { detectSimpleOS, type SimpleOS } from '@/lib/platform'
 import { cn } from '@/lib/utils'
-import type { Platform } from '@/lib/platform'
-
-type DownloadStep = 'idle' | 'generating' | 'downloading' | 'completed' | 'error'
 
 interface DownloadModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   projectId: number | string
   projectName: string
-  platform: Platform
+  projectHash: string
+  apiKey: string
+  initialOS?: SimpleOS
 }
 
-const platformInstructions: Record<Platform, {
+const osInfo: Record<SimpleOS, {
   title: string
-  steps: string[]
-  commands?: string[]
+  description: string
+  archNote: string
   warning?: string
 }> = {
-  'darwin-arm64': {
-    title: 'macOS (Apple Silicon) 설치 안내',
-    steps: [
-      '다운로드된 zip 파일을 프로젝트 루트 폴더에 압축 해제하세요.',
-      '터미널에서 아래 명령어를 실행하여 실행 권한을 부여하세요.',
-      'Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.',
-    ],
-    commands: [
-      'chmod +x .claude/hooks/user_prompt_submit',
-      'chmod +x .claude/hooks/stop',
-    ],
+  'mac': {
+    title: 'macOS',
+    description: '아래 명령어를 프로젝트 루트 디렉토리에서 실행하세요.',
+    archNote: '아키텍처(Intel/Apple Silicon)는 자동으로 감지됩니다.',
   },
-  'darwin-amd64': {
-    title: 'macOS (Intel) 설치 안내',
-    steps: [
-      '다운로드된 zip 파일을 프로젝트 루트 폴더에 압축 해제하세요.',
-      '터미널에서 아래 명령어를 실행하여 실행 권한을 부여하세요.',
-      'Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.',
-    ],
-    commands: [
-      'chmod +x .claude/hooks/user_prompt_submit',
-      'chmod +x .claude/hooks/stop',
-    ],
+  'linux': {
+    title: 'Linux',
+    description: '아래 명령어를 프로젝트 루트 디렉토리에서 실행하세요.',
+    archNote: '아키텍처(x64/ARM64)는 자동으로 감지됩니다.',
   },
-  'linux-amd64': {
-    title: 'Linux (x64) 설치 안내',
-    steps: [
-      '다운로드된 zip 파일을 프로젝트 루트 폴더에 압축 해제하세요.',
-      '터미널에서 아래 명령어를 실행하여 실행 권한을 부여하세요.',
-      'Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.',
-    ],
-    commands: [
-      'chmod +x .claude/hooks/user_prompt_submit',
-      'chmod +x .claude/hooks/stop',
-    ],
-  },
-  'linux-arm64': {
-    title: 'Linux (ARM64) 설치 안내',
-    steps: [
-      '다운로드된 zip 파일을 프로젝트 루트 폴더에 압축 해제하세요.',
-      '터미널에서 아래 명령어를 실행하여 실행 권한을 부여하세요.',
-      'Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.',
-    ],
-    commands: [
-      'chmod +x .claude/hooks/user_prompt_submit',
-      'chmod +x .claude/hooks/stop',
-    ],
-  },
-  'windows-amd64': {
-    title: 'Windows (x64) 설치 안내',
-    steps: [
-      '다운로드된 zip 파일을 프로젝트 루트 폴더에 압축 해제하세요.',
-      'Windows에서는 추가 권한 설정이 필요하지 않습니다.',
-      'Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.',
-    ],
+  'windows': {
+    title: 'Windows',
+    description: 'PowerShell에서 아래 명령어를 프로젝트 루트 디렉토리에서 실행하세요.',
+    archNote: '',
     warning: 'Windows Defender가 파일을 차단할 수 있습니다. 차단될 경우 "추가 정보" → "실행"을 선택해주세요.',
   },
 }
 
+const osOptions: { os: SimpleOS; label: string; icon: React.ReactNode }[] = [
+  { os: 'mac', label: 'Mac', icon: <Apple className="h-4 w-4" /> },
+  { os: 'windows', label: 'Windows', icon: <Monitor className="h-4 w-4" /> },
+  { os: 'linux', label: 'Linux', icon: <Terminal className="h-4 w-4" /> },
+]
+
 export function DownloadModal({
   open,
   onOpenChange,
-  projectId,
   projectName,
-  platform
+  projectHash,
+  apiKey,
+  initialOS
 }: DownloadModalProps) {
-  const [step, setStep] = useState<DownloadStep>('idle')
-  const [error, setError] = useState<string | null>(null)
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [uninstallCopied, setUninstallCopied] = useState(false)
+  const [selectedOS, setSelectedOS] = useState<SimpleOS>(initialOS || 'mac')
 
-  const instructions = platformInstructions[platform]
+  // 모달이 열릴 때 OS 감지
+  useEffect(() => {
+    if (open && !initialOS) {
+      const detected = detectSimpleOS()
+      if (detected) {
+        setSelectedOS(detected)
+      }
+    }
+  }, [open, initialOS])
 
-  const handleCopyCommand = async (command: string, index: number) => {
+  const info = osInfo[selectedOS]
+  const isWindows = selectedOS === 'windows'
+
+  // 기본 URL 생성
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
+
+  // 설치 명령어 생성
+  const installCommand = useMemo(() => {
+    const scriptUrl = `${baseUrl}/api/install-script?projectHash=${projectHash}&os=${selectedOS}`
+
+    if (isWindows) {
+      return `$headers = @{ "X-API-Key" = "${apiKey}" }; iwr -useb "${scriptUrl}" -Headers $headers | iex`
+    } else {
+      return `curl -fsSL -H "X-API-Key: ${apiKey}" "${scriptUrl}" | bash`
+    }
+  }, [baseUrl, projectHash, apiKey, selectedOS, isWindows])
+
+  // 삭제 명령어 생성
+  const uninstallCommand = useMemo(() => {
+    if (isWindows) {
+      return `Remove-Item -Recurse -Force .claude, .codetracker -ErrorAction SilentlyContinue`
+    } else {
+      return `rm -rf .claude .codetracker`
+    }
+  }, [isWindows])
+
+  const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(command)
-      setCopiedIndex(index)
-      setTimeout(() => setCopiedIndex(null), 2000)
+      await navigator.clipboard.writeText(installCommand)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
       console.error('Failed to copy command')
     }
   }
 
-  const startDownload = useCallback(async () => {
-    setStep('generating')
-    setError(null)
-
+  const handleUninstallCopy = async () => {
     try {
-      const url = `/api/download-codetracker?projectId=${projectId}&platform=${platform}`
-
-      // Step 1: 파일 생성 (fetch로 서버에서 zip 파일 생성)
-      const response = await fetch(url)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || '파일 생성에 실패했습니다')
-      }
-
-      // Step 2: 다운로드 단계
-      setStep('downloading')
-
-      // blob으로 변환
-      const blob = await response.blob()
-
-      // 파일명 추출
-      const contentDisposition = response.headers.get('Content-Disposition')
-      let filename = `codetracker_${projectName}.zip`
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename="(.+)"/)
-        if (match) {
-          filename = match[1]
-        }
-      }
-
-      // 다운로드 링크 생성 및 클릭
-      const downloadUrl = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = downloadUrl
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-
-      // 정리
-      setTimeout(() => {
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(downloadUrl)
-      }, 100)
-
-      // 완료
-      setStep('completed')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다')
-      setStep('error')
+      await navigator.clipboard.writeText(uninstallCommand)
+      setUninstallCopied(true)
+      setTimeout(() => setUninstallCopied(false), 2000)
+    } catch {
+      console.error('Failed to copy uninstall command')
     }
-  }, [projectId, platform, projectName])
-
-  // 모달이 열리면 자동으로 다운로드 시작
-  useEffect(() => {
-    if (open && step === 'idle') {
-      startDownload()
-    }
-  }, [open, step, startDownload])
-
-  // 모달이 닫히면 상태 초기화
-  useEffect(() => {
-    if (!open) {
-      // 약간의 딜레이 후 초기화 (애니메이션 완료 후)
-      const timer = setTimeout(() => {
-        setStep('idle')
-        setError(null)
-        setCopiedIndex(null)
-      }, 200)
-      return () => clearTimeout(timer)
-    }
-  }, [open])
-
-  const renderStepIcon = (currentStep: DownloadStep, targetStep: DownloadStep) => {
-    const stepOrder: DownloadStep[] = ['generating', 'downloading', 'completed']
-    const currentIndex = stepOrder.indexOf(currentStep)
-    const targetIndex = stepOrder.indexOf(targetStep)
-
-    if (currentStep === 'error') {
-      return <AlertTriangle className="h-5 w-5 text-destructive" />
-    }
-
-    if (currentIndex > targetIndex) {
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />
-    }
-
-    if (currentIndex === targetIndex) {
-      return <Loader2 className="h-5 w-5 animate-spin text-primary" />
-    }
-
-    return <Circle className="h-5 w-5 text-muted-foreground" />
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>CodeTracker 다운로드</DialogTitle>
+          <DialogTitle>CodeTracker 환경 설정</DialogTitle>
           <DialogDescription>
-            {projectName} 프로젝트용 설정 파일
+            {projectName} 프로젝트의 CodeTracker 설치 및 삭제
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* 진행 단계 */}
-          <div className="space-y-4">
-            {/* Step 1: 파일 생성 */}
-            <div className="flex items-center gap-3">
-              {renderStepIcon(step, 'generating')}
-              <div className="flex items-center gap-2">
-                <FileArchive className="h-4 w-4 text-muted-foreground" />
-                <span className={cn(
-                  "text-sm",
-                  step === 'generating' ? "text-foreground font-medium" : "text-muted-foreground"
-                )}>
-                  설정 파일 생성 중...
-                </span>
-              </div>
-            </div>
-
-            {/* Step 2: 다운로드 */}
-            <div className="flex items-center gap-3">
-              {renderStepIcon(step, 'downloading')}
-              <div className="flex items-center gap-2">
-                <Download className="h-4 w-4 text-muted-foreground" />
-                <span className={cn(
-                  "text-sm",
-                  step === 'downloading' ? "text-foreground font-medium" : "text-muted-foreground"
-                )}>
-                  파일 다운로드 중...
-                </span>
-              </div>
-            </div>
-
-            {/* 에러 메시지 */}
-            {step === 'error' && error && (
-              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                <p className="text-sm text-destructive">{error}</p>
+          {/* OS 선택 */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">운영체제 선택</h4>
+            <div className="grid grid-cols-3 gap-2">
+              {osOptions.map((option) => (
                 <Button
+                  key={option.os}
                   variant="outline"
                   size="sm"
-                  onClick={startDownload}
-                  className="mt-2"
+                  onClick={() => setSelectedOS(option.os)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 h-10",
+                    selectedOS === option.os && "border-primary bg-primary/10 text-primary"
+                  )}
                 >
-                  다시 시도
+                  {option.icon}
+                  <span>{option.label}</span>
                 </Button>
-              </div>
-            )}
-          </div>
-
-          {/* 설치 안내 (항상 표시) */}
-          <div className="space-y-4 border-t border-border pt-4">
-            {step === 'completed' && (
-              <div className="flex items-center gap-2 text-green-500">
-                <CheckCircle2 className="h-5 w-5" />
-                <span className="font-medium">다운로드 완료!</span>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">{instructions.title}</h4>
-
-              <ol className="space-y-2 text-sm text-muted-foreground">
-                {instructions.steps.map((stepText, index) => (
-                  <li key={index} className="flex gap-2">
-                    <span className="text-primary font-medium">{index + 1}.</span>
-                    <span>{stepText}</span>
-                  </li>
-                ))}
-              </ol>
-
-              {/* 명령어 복사 영역 */}
-              {instructions.commands && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Terminal className="h-3 w-3" />
-                    <span>터미널 명령어</span>
-                  </div>
-                  {instructions.commands.map((command, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2 font-mono text-xs"
-                    >
-                      <code className="truncate">{command}</code>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 shrink-0"
-                        onClick={() => handleCopyCommand(command, index)}
-                      >
-                        {copiedIndex === index ? (
-                          <Check className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 경고 메시지 */}
-              {instructions.warning && (
-                <div className="flex items-start gap-2 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-3">
-                  <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-500 mt-0.5" />
-                  <p className="text-xs text-yellow-500">{instructions.warning}</p>
-                </div>
-              )}
+              ))}
             </div>
           </div>
+
+          {/* OS 정보 */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">{info.description}</p>
+            {info.archNote && (
+              <p className="text-xs text-primary/80">{info.archNote}</p>
+            )}
+          </div>
+
+          {/* 설치 명령어 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Terminal className="h-3 w-3" />
+              <span>{isWindows ? 'PowerShell 명령어' : '터미널 명령어'}</span>
+            </div>
+
+            <div className="relative group">
+              <div className="flex items-center justify-between gap-2 rounded-lg bg-muted/50 border border-border p-4 font-mono text-sm overflow-x-auto">
+                <code className="whitespace-pre-wrap break-all">{installCommand}</code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 ml-2"
+                  onClick={handleCopy}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {copied && (
+              <p className="text-xs text-green-500 flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                클립보드에 복사되었습니다!
+              </p>
+            )}
+          </div>
+
+          {/* 설치 후 안내 */}
+          <div className="space-y-2 border-t border-border pt-4">
+            <h4 className="text-sm font-medium">설치 후</h4>
+            <ul className="space-y-1 text-sm text-muted-foreground list-disc list-inside">
+              <li>Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.</li>
+              <li>AI 작업 기록이 자동으로 수집됩니다.</li>
+            </ul>
+          </div>
+
+          {/* 삭제 가이드 */}
+          <div className="space-y-3 border-t border-border pt-4">
+            <div className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4 text-destructive" />
+              <h4 className="text-sm font-medium">CodeTracker 삭제</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              CodeTracker를 완전히 삭제하려면 프로젝트 루트 디렉토리에서 아래 명령어를 실행하세요.
+            </p>
+            <div className="relative group">
+              <div className="flex items-center justify-between gap-2 rounded-lg bg-destructive/10 border border-destructive/30 p-3 font-mono text-xs overflow-x-auto">
+                <code className="whitespace-pre-wrap break-all text-destructive">{uninstallCommand}</code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0 ml-2"
+                  onClick={handleUninstallCopy}
+                >
+                  {uninstallCopied ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            {uninstallCopied && (
+              <p className="text-xs text-green-500 flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                클립보드에 복사되었습니다!
+              </p>
+            )}
+          </div>
+
+          {/* 경고 메시지 */}
+          {info.warning && (
+            <div className="flex items-start gap-2 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-3">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-yellow-500 mt-0.5" />
+              <p className="text-xs text-yellow-500">{info.warning}</p>
+            </div>
+          )}
         </div>
 
         {/* 하단 버튼 */}
-        <div className="flex justify-end pt-2">
-          <Button
-            variant={step === 'completed' ? 'default' : 'outline'}
-            onClick={() => onOpenChange(false)}
-          >
-            {step === 'completed' ? '완료' : '닫기'}
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            닫기
+          </Button>
+          <Button onClick={handleCopy} className="gap-2">
+            {copied ? (
+              <>
+                <Check className="h-4 w-4" />
+                복사됨
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                명령어 복사
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>

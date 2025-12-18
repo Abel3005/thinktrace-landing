@@ -5,6 +5,9 @@ export type Platform =
   | "linux-arm64"
   | "windows-amd64"
 
+// 단순화된 OS 타입 (사용자 선택용)
+export type SimpleOS = "mac" | "linux" | "windows"
+
 export interface PlatformInfo {
   platform: Platform
   os: string
@@ -13,12 +16,24 @@ export interface PlatformInfo {
   extension: string
 }
 
+export interface SimpleOSInfo {
+  os: SimpleOS
+  displayName: string
+  icon: string
+}
+
 const platformDisplayNames: Record<Platform, string> = {
   "darwin-amd64": "macOS (Intel)",
   "darwin-arm64": "macOS (Apple Silicon)",
   "linux-amd64": "Linux (x64)",
   "linux-arm64": "Linux (ARM64)",
   "windows-amd64": "Windows (x64)",
+}
+
+const simpleOSDisplayNames: Record<SimpleOS, SimpleOSInfo> = {
+  mac: { os: "mac", displayName: "Mac", icon: "🍎" },
+  linux: { os: "linux", displayName: "Linux", icon: "🐧" },
+  windows: { os: "windows", displayName: "Windows", icon: "🪟" },
 }
 
 export function detectPlatform(): PlatformInfo | null {
@@ -98,4 +113,33 @@ export function getAllPlatforms(): { platform: Platform; displayName: string }[]
     { platform: "linux-arm64", displayName: "Linux (ARM64)" },
     { platform: "windows-amd64", displayName: "Windows (x64)" },
   ]
+}
+
+// 단순화된 OS 목록 반환
+export function getSimpleOSList(): SimpleOSInfo[] {
+  return [
+    simpleOSDisplayNames.mac,
+    simpleOSDisplayNames.linux,
+    simpleOSDisplayNames.windows,
+  ]
+}
+
+// 현재 브라우저 기반으로 단순 OS 감지
+export function detectSimpleOS(): SimpleOS | null {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return null
+  }
+
+  const userAgent = navigator.userAgent.toLowerCase()
+  const platform = navigator.platform?.toLowerCase() || ""
+
+  if (userAgent.includes("mac") || platform.includes("mac")) {
+    return "mac"
+  } else if (userAgent.includes("win") || platform.includes("win")) {
+    return "windows"
+  } else if (userAgent.includes("linux") || platform.includes("linux")) {
+    return "linux"
+  }
+
+  return null
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServerClient } from '@/lib/supabase/server';
+import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server';
 import JSZip from 'jszip';
 import { readFile } from 'fs/promises';
 import path from 'path';
@@ -94,11 +94,13 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const projectId = searchParams.get('projectId');
+    const projectHash = searchParams.get('projectHash');
+    const apiKey = request.headers.get('X-API-Key');
     const platform = searchParams.get('platform') as Platform | null;
 
-    if (!projectId) {
+    if (!projectId && !projectHash) {
       return NextResponse.json(
-        { error: 'Project ID is required' },
+        { error: 'Project ID or Project Hash is required' },
         { status: 400 }
       );
     }
@@ -110,40 +112,79 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 인증 확인
-    const supabase = await getSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    let userId: string;
+    let userData: { api_key: string; username: string; email: string } | null = null;
+    let supabase;
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // API 키 인증 또는 세션 인증
+    if (apiKey) {
+      // API 키로 인증 (RLS 우회)
+      supabase = getSupabaseAdminClient();
+      const { data: userByApiKey } = await supabase
+        .from('users')
+        .select('id, api_key, username, email')
+        .eq('api_key', apiKey)
+        .single();
+
+      if (!userByApiKey) {
+        return NextResponse.json(
+          { error: 'Invalid API key' },
+          { status: 401 }
+        );
+      }
+
+      userId = userByApiKey.id;
+      userData = {
+        api_key: userByApiKey.api_key,
+        username: userByApiKey.username,
+        email: userByApiKey.email,
+      };
+    } else {
+      // 세션 인증
+      supabase = await getSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+
+      userId = user.id;
+
+      // 사용자 데이터 조회
+      const { data: userDataResult } = await supabase
+        .from('users')
+        .select('api_key, username, email')
+        .eq('id', user.id)
+        .single();
+
+      if (!userDataResult) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+
+      userData = userDataResult;
     }
 
-    // 사용자 데이터 및 API 키 조회
-    const { data: userData } = await supabase
-      .from('users')
-      .select('api_key, username, email')
-      .eq('id', user.id)
-      .single();
-
-    if (!userData) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // 프로젝트 조회 (사용자 소유 확인)
-    const { data: project } = await supabase
+    // 프로젝트 조회 (projectHash 또는 projectId로)
+    let projectQuery = supabase
       .from('repositories')
       .select('id, repo_name, repo_hash')
-      .eq('id', projectId)
-      .eq('user_id', user.id)
-      .single();
+      .eq('user_id', userId);
+
+    if (projectHash) {
+      projectQuery = projectQuery.eq('repo_hash', projectHash);
+    } else if (projectId) {
+      projectQuery = projectQuery.eq('id', projectId);
+    }
+
+    const { data: project } = await projectQuery.single();
 
     if (!project) {
       return NextResponse.json(
@@ -158,16 +199,10 @@ export async function GET(request: NextRequest) {
     // .codetracker 폴더 생성
     const codetrackerFolder = zip.folder('.codetracker');
 
-    // config.json 읽기 (원본 zip에서)
-    const originalZipPath = path.join(process.cwd(), 'tmp', 'codetracker_install.zip');
-    const originalZipBuffer = await readFile(originalZipPath);
-    const originalZip = await JSZip.loadAsync(originalZipBuffer);
-
-    const configFile = originalZip.file('.codetracker/config.json');
-    if (configFile) {
-      const configContent = await configFile.async('string');
-      codetrackerFolder?.file('config.json', configContent);
-    }
+    // config.json 읽기 (tmp 폴더에서)
+    const configPath = path.join(process.cwd(), 'tmp', 'config.json');
+    const configContent = await readFile(configPath, 'utf-8');
+    codetrackerFolder?.file('config.json', configContent);
 
     // credentials.json 생성
     const credentials = {

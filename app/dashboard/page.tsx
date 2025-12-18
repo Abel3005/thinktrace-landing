@@ -49,7 +49,7 @@ export default async function DashboardPage() {
           <ContributionHeatmap data={contributions} stats={stats} />
 
           {/* 프로젝트 리스트 */}
-          <ProjectList projects={projects} userId={authUser.id} />
+          <ProjectList projects={projects} userId={authUser.id} apiKey={userData?.api_key || ''} />
           
           
         </div>

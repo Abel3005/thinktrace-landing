@@ -2,19 +2,20 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Download, ChevronDown } from "lucide-react"
+import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Settings, Trash2, Loader2 } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { useState, useEffect } from 'react'
-import { detectPlatform, getAllPlatforms, type Platform } from '@/lib/platform'
+import { useState } from 'react'
 import { DownloadModal } from './download-modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export interface ProjectStatistics {
   repo_id: number;
@@ -32,19 +33,14 @@ export interface ProjectStatistics {
 
 interface ProjectListItemProps {
   project: ProjectStatistics;
+  apiKey: string;
+  onDelete?: (projectId: number) => void;
 }
 
-export function ProjectListItem({ project }: ProjectListItemProps) {
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
+export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemProps) {
   const [modalOpen, setModalOpen] = useState(false);
-  const allPlatforms = getAllPlatforms();
-
-  useEffect(() => {
-    const detected = detectPlatform();
-    if (detected) {
-      setSelectedPlatform(detected.platform);
-    }
-  }, []);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const lastUpdated = formatDistanceToNow(new Date(project.updated_at), {
     addSuffix: true,
@@ -53,19 +49,30 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
 
   const netChanges = project.total_insertions - project.total_deletions;
 
-  const handlePlatformSelect = (platform: Platform) => {
-    setSelectedPlatform(platform);
-  };
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/projects/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectId: project.repo_id }),
+      });
 
-  const handleDownload = () => {
-    if (selectedPlatform) {
-      setModalOpen(true);
+      if (!response.ok) {
+        throw new Error('Failed to delete project');
+      }
+
+      setDeleteDialogOpen(false);
+      onDelete?.(project.repo_id);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('프로젝트 삭제에 실패했습니다.');
+    } finally {
+      setIsDeleting(false);
     }
   };
-
-  const currentPlatformName = selectedPlatform
-    ? allPlatforms.find(p => p.platform === selectedPlatform)?.displayName
-    : '플랫폼 선택';
 
   return (
     <>
@@ -102,35 +109,21 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <span className="text-xs text-muted-foreground">{currentPlatformName}</span>
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {allPlatforms.map((p) => (
-                    <DropdownMenuItem
-                      key={p.platform}
-                      onClick={() => handlePlatformSelect(p.platform)}
-                      className={cn(
-                        selectedPlatform === p.platform && "bg-accent"
-                      )}
-                    >
-                      {p.displayName}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleDownload}
-                disabled={!selectedPlatform}
+                onClick={() => setModalOpen(true)}
               >
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1">다운로드</span>
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">환경 설정</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDeleteDialogOpen(true)}
+                className="text-red-500 hover:text-red-600 hover:border-red-500/50"
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -200,15 +193,50 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
       </CardContent>
     </Card>
 
-    {selectedPlatform && (
-      <DownloadModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        projectId={project.repo_id}
-        projectName={project.repo_name}
-        platform={selectedPlatform}
-      />
-    )}
+    <DownloadModal
+      open={modalOpen}
+      onOpenChange={setModalOpen}
+      projectId={project.repo_id}
+      projectName={project.repo_name}
+      projectHash={project.repo_hash}
+      apiKey={apiKey}
+    />
+
+    <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>프로젝트 삭제</DialogTitle>
+          <DialogDescription>
+            <span className="font-semibold text-foreground">{project.repo_name}</span> 프로젝트를 삭제하시겠습니까?
+            <br />
+            <span className="text-red-500">이 작업은 되돌릴 수 없습니다.</span>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={isDeleting}
+          >
+            취소
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                삭제 중...
+              </>
+            ) : (
+              '삭제'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }

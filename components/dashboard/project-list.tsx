@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { FolderGit2 } from "lucide-react"
 import { ProjectListItem, ProjectStatistics } from "./project-list-item"
@@ -6,9 +9,16 @@ import { AddProjectDialog } from "./add-project-dialog"
 interface ProjectListProps {
   projects: ProjectStatistics[];
   userId: string;
+  apiKey: string;
 }
 
-export function ProjectList({ projects, userId }: ProjectListProps) {
+export function ProjectList({ projects: initialProjects, userId, apiKey }: ProjectListProps) {
+  const [projects, setProjects] = useState<ProjectStatistics[]>(initialProjects);
+
+  const handleDeleteProject = (projectId: number) => {
+    setProjects(prev => prev.filter(p => p.repo_id !== projectId));
+  };
+
   if (!projects || projects.length === 0) {
     return (
       <Card className="border-border/50 bg-card/50">
@@ -33,7 +43,12 @@ export function ProjectList({ projects, userId }: ProjectListProps) {
 
       <div className="space-y-3">
         {projects.map((project) => (
-          <ProjectListItem key={project.repo_id} project={project} />
+          <ProjectListItem
+            key={project.repo_id}
+            project={project}
+            apiKey={apiKey}
+            onDelete={handleDeleteProject}
+          />
         ))}
       </div>
     </div>

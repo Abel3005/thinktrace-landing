@@ -122,6 +122,7 @@ export async function getProjectCommits(
 export interface ProjectInfo {
   id: number;
   repo_name: string;
+  repo_hash: string;
   description: string | null;
   created_at: string;
   updated_at: string;
@@ -134,7 +135,7 @@ export async function getProjectInfo(
 ): Promise<{ data: ProjectInfo | null; error: any }> {
   return await supabase
     .from('repositories')
-    .select('id, repo_name, description, created_at, updated_at')
+    .select('id, repo_name, repo_hash, description, created_at, updated_at')
     .eq('id', projectId)
     .eq('user_id', userId)
     .single();

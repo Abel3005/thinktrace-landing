@@ -77,63 +77,69 @@ echo "💡 Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩�
 `;
 }
 
-function generateWindowsBatchScript(
+function generatePowerShellScript(
   baseUrl: string,
   projectHash: string,
   apiKey: string
 ): string {
-  return `@echo off
-chcp 65001 >nul 2>&1
-setlocal enabledelayedexpansion
+  return `# CodeTracker 설치 스크립트 (Windows)
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 
-echo [*] CodeTracker 설치를 시작합니다...
+Write-Host "🚀 CodeTracker 설치를 시작합니다..." -ForegroundColor Cyan
 
-:: 임시 파일 경로
-set "TMP_ZIP=%TEMP%\\codetracker_%RANDOM%.zip"
+# 현재 디렉토리 확인
+$projectIndicators = @(".git", "package.json", "Cargo.toml", "go.mod")
+$isProjectRoot = $projectIndicators | Where-Object { Test-Path $_ }
 
-:: 다운로드
-echo [^>] 파일 다운로드 중...
-curl -fsSL -H "X-API-Key: ${apiKey}" "${baseUrl}/api/download-codetracker?projectHash=${projectHash}&platform=windows-amd64" -o "%TMP_ZIP%"
+if (-not $isProjectRoot) {
+    Write-Host "⚠️  경고: 프로젝트 루트 디렉토리에서 실행하는 것을 권장합니다." -ForegroundColor Yellow
+    $response = Read-Host "계속하시겠습니까? (y/N)"
+    if ($response -notmatch "^[Yy]$") {
+        Write-Host "설치가 취소되었습니다."
+        exit 1
+    }
+}
 
-if not exist "%TMP_ZIP%" (
-    echo [X] 다운로드 실패
-    exit /b 1
-)
+# 임시 파일 생성
+$TmpZip = [System.IO.Path]::GetTempFileName() + ".zip"
 
-:: 파일 크기 확인
-for %%A in ("%TMP_ZIP%") do set "FILE_SIZE=%%~zA"
-if "%FILE_SIZE%"=="0" (
-    echo [X] 다운로드 실패: 빈 파일
-    del "%TMP_ZIP%" >nul 2>&1
-    exit /b 1
-)
+try {
+    # 다운로드 (curl 사용)
+    Write-Host "📥 파일 다운로드 중..." -ForegroundColor Cyan
+    $url = "${baseUrl}/api/download-codetracker?projectHash=${projectHash}&platform=windows-amd64"
+    curl.exe -fsSL -H "X-API-Key: ${apiKey}" $url -o $TmpZip
 
-:: 압축 해제
-echo [^>] 파일 압축 해제 중...
-powershell -Command "Expand-Archive -Path '%TMP_ZIP%' -DestinationPath '.' -Force"
+    if (-not (Test-Path $TmpZip) -or (Get-Item $TmpZip).Length -eq 0) {
+        throw "다운로드 실패"
+    }
 
-if errorlevel 1 (
-    echo [X] 압축 해제 실패
-    del "%TMP_ZIP%" >nul 2>&1
-    exit /b 1
-)
+    # 압축 해제
+    Write-Host "📦 파일 압축 해제 중..." -ForegroundColor Cyan
+    Expand-Archive -Path $TmpZip -DestinationPath . -Force
 
-:: 정리
-del "%TMP_ZIP%" >nul 2>&1
+    Write-Host ""
+    Write-Host "✅ CodeTracker 설치 완료!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "📁 설치된 파일:" -ForegroundColor Cyan
+    Write-Host "   .codetracker\\config.json"
+    Write-Host "   .codetracker\\credentials.json"
+    Write-Host "   .claude\\settings.json"
+    Write-Host "   .claude\\hooks\\user_prompt_submit.exe"
+    Write-Host "   .claude\\hooks\\stop.exe"
+    Write-Host ""
+    Write-Host "💡 Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다." -ForegroundColor Yellow
 
-echo.
-echo [+] CodeTracker 설치 완료!
-echo.
-echo [i] 설치된 파일:
-echo     .codetracker\\config.json
-echo     .codetracker\\credentials.json
-echo     .claude\\settings.json
-echo     .claude\\hooks\\user_prompt_submit.exe
-echo     .claude\\hooks\\stop.exe
-echo.
-echo [*] Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다.
-
-endlocal
+} catch {
+    Write-Host "❌ 설치 실패: \$_" -ForegroundColor Red
+    exit 1
+} finally {
+    # 정리
+    if (Test-Path $TmpZip) {
+        Remove-Item $TmpZip -Force
+    }
+}
 `;
 }
 
@@ -203,7 +209,7 @@ export async function GET(request: NextRequest) {
     // OS에 따른 스크립트 생성
     const isWindows = os === 'windows';
     const script = isWindows
-      ? generateWindowsBatchScript(baseUrl, projectHash, apiKey)
+      ? generatePowerShellScript(baseUrl, projectHash, apiKey)
       : generateBashScript(baseUrl, projectHash, apiKey, os);
 
     const contentType = isWindows ? 'text/plain; charset=utf-8' : 'text/x-shellscript; charset=utf-8';

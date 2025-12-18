@@ -94,7 +94,7 @@ export function DownloadModal({
     const scriptUrl = `${baseUrl}/api/install-script?projectHash=${projectHash}&os=${selectedOS}`
 
     if (isWindows) {
-      return `$headers = @{ "X-API-Key" = "${apiKey}" }; iwr -useb "${scriptUrl}" -Headers $headers | iex`
+      return `curl.exe -fsSL -H "X-API-Key: ${apiKey}" "${scriptUrl}" | powershell -`
     } else {
       return `curl -fsSL -H "X-API-Key: ${apiKey}" "${scriptUrl}" | bash`
     }

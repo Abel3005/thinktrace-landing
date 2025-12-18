@@ -38,17 +38,6 @@ case "$ARCH" in
     ;;
 esac
 
-# 현재 디렉토리 확인
-if [ ! -d ".git" ] && [ ! -f "package.json" ] && [ ! -f "Cargo.toml" ] && [ ! -f "go.mod" ]; then
-  echo "⚠️  경고: 프로젝트 루트 디렉토리에서 실행하는 것을 권장합니다."
-  read -p "계속하시겠습니까? (y/N) " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "설치가 취소되었습니다."
-    exit 1
-  fi
-fi
-
 # 임시 파일 생성
 TMP_ZIP=$(mktemp /tmp/codetracker.XXXXXX.zip)
 

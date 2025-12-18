@@ -1,4 +1,4 @@
-import { getSupabaseAdminClient } from "@/lib/supabase/server"
+import { getSupabaseServerClient, getSupabaseAdminClient } from "@/lib/supabase/server"
 import { fetchAllUserStatistics } from "@/lib/api/client"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,7 +34,21 @@ interface UserWithStats extends User {
 }
 
 export default async function AdminDashboardPage() {
-  // 관리자 클라이언트로 사용자 데이터 조회 (users는 Supabase에서)
+  // 현재 로그인한 admin 사용자의 API 키 조회
+  const supabase = await getSupabaseServerClient()
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser()
+
+  const { data: currentUser } = await supabase
+    .from("users")
+    .select("api_key")
+    .eq("id", authUser!.id)
+    .single()
+
+  const adminApiKey = currentUser?.api_key
+
+  // 관리자 클라이언트로 모든 사용자 데이터 조회 (users는 Supabase에서)
   const adminClient = getSupabaseAdminClient()
 
   const { data: usersData, error: usersError } = await adminClient
@@ -48,9 +62,7 @@ export default async function AdminDashboardPage() {
 
   const users = (usersData as User[]) || []
 
-  // 통계 데이터는 External API에서 조회
-  // 첫 번째 관리자 사용자의 API 키를 사용
-  const adminApiKey = users.find(u => u.api_key)?.api_key
+  // 통계 데이터는 External API에서 조회 (현재 로그인한 admin의 API 키 사용)
   const statsData = await fetchAllUserStatistics(adminApiKey)
 
   // 통계 데이터를 user_id 기준으로 맵핑

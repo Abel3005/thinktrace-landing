@@ -2,7 +2,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { UserInfo } from "@/components/dashboard/user-info"
 import { AdminProjectList } from "@/components/dashboard/admin-project-list"
-import { getProjectStatistics } from "@/lib/supabase/queries"
+import { fetchUserStatistics, fetchProjectStatistics } from "@/lib/api/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,23 +17,26 @@ interface AdminUserDetailPageProps {
 export default async function AdminUserDetailPage({ params }: AdminUserDetailPageProps) {
   const { userId } = await params
 
-  // 관리자 클라이언트로 대상 사용자 데이터 조회 (RLS 우회)
+  // 관리자 클라이언트로 대상 사용자 데이터 조회 (users는 Supabase에서)
   const adminClient = getSupabaseAdminClient()
 
-  // 모든 데이터를 병렬로 fetch
-  const [
-    { data: userData, error: userError },
-    { data: stats },
-    { data: projectData },
-  ] = await Promise.all([
-    adminClient.from("users").select("*").eq("id", userId).single(),
-    adminClient.from("user_statistics").select("*").eq("user_id", userId).single(),
-    getProjectStatistics(userId, adminClient),
-  ])
+  const { data: userData, error: userError } = await adminClient
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single()
 
   if (userError || !userData) {
     notFound()
   }
+
+  const apiKey = userData.api_key
+
+  // 통계 및 프로젝트 데이터는 External API에서 조회
+  const [stats, projectData] = await Promise.all([
+    fetchUserStatistics(userId, apiKey),
+    fetchProjectStatistics(userId, apiKey),
+  ])
 
   const projects = projectData || []
 

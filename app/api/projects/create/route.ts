@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { createHash, randomBytes } from "crypto"
+import { createProject } from "@/lib/api/client"
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,32 +31,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Generate unique hash for the project
-    // Combination of timestamp, random bytes, and project name
-    const timestamp = Date.now().toString()
-    const random = randomBytes(16).toString("hex")
-    const projectHash = createHash("sha256")
-      .update(`${name}-${timestamp}-${random}`)
-      .digest("hex")
-      .substring(0, 16) // Use first 32 characters
-
-    // Insert project into database
-    // Assuming you have a 'repositories' or 'projects' table
-    const { data, error } = await supabase
-      .from("repositories")
-      .insert({
-        user_id: userId,
-        repo_name: name.trim(),
-        description: description?.trim() || null,
-        repo_hash: projectHash,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
+    // Get user's API key for external API call
+    const { data: userData } = await supabase
+      .from("users")
+      .select("api_key")
+      .eq("id", user.id)
       .single()
 
-    if (error) {
-      console.error("Database error:", error)
+    const apiKey = userData?.api_key
+
+    // Call external API to create project
+    const result = await createProject(
+      userId,
+      name.trim(),
+      description?.trim() || undefined,
+      apiKey
+    )
+
+    if (!result) {
       return NextResponse.json(
         { error: "Failed to create project" },
         { status: 500 }
@@ -65,8 +57,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      project: data,
-      hash: projectHash,
+      project: result.project,
+      hash: result.hash,
     })
   } catch (error) {
     console.error("Error creating project:", error)

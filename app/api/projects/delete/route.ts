@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
-
-const ARCHIVE_USER_EMAIL = "contact@thinktrace.net"
+import { deleteProject } from "@/lib/api/client"
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,47 +26,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify the project belongs to the user
-    const { data: project, error: projectError } = await supabase
-      .from("repositories")
-      .select("id, user_id")
-      .eq("id", projectId)
-      .eq("user_id", user.id)
-      .single()
-
-    if (projectError || !project) {
-      return NextResponse.json(
-        { error: "Project not found or access denied" },
-        { status: 404 }
-      )
-    }
-
-    // Get the archive user's ID (contact@thinktrace.net)
-    const { data: archiveUser, error: archiveError } = await supabase
+    // Get user's API key for external API call
+    const { data: userData } = await supabase
       .from("users")
-      .select("id")
-      .eq("email", ARCHIVE_USER_EMAIL)
+      .select("api_key")
+      .eq("id", user.id)
       .single()
 
-    if (archiveError || !archiveUser) {
-      console.error("Archive user not found:", archiveError)
-      return NextResponse.json(
-        { error: "Failed to process deletion" },
-        { status: 500 }
-      )
-    }
+    const apiKey = userData?.api_key
 
-    // Transfer ownership to archive user instead of deleting
-    const { error: updateError } = await supabase
-      .from("repositories")
-      .update({
-        user_id: archiveUser.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", projectId)
+    // Call external API to delete (archive) project
+    const success = await deleteProject(projectId, user.id, apiKey)
 
-    if (updateError) {
-      console.error("Failed to archive project:", updateError)
+    if (!success) {
       return NextResponse.json(
         { error: "Failed to delete project" },
         { status: 500 }

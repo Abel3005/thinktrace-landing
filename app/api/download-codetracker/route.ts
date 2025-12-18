@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient, getSupabaseAdminClient } from '@/lib/supabase/server';
+import { lookupRepository } from '@/lib/api/client';
 import JSZip from 'jszip';
 import { readFile } from 'fs/promises';
 import path from 'path';
@@ -72,13 +73,15 @@ export async function HEAD(request: NextRequest) {
       return new NextResponse(null, { status: 401 });
     }
 
-    // 프로젝트 소유권 확인
-    const { data: project } = await supabase
-      .from('repositories')
-      .select('id')
-      .eq('id', projectId)
-      .eq('user_id', user.id)
+    // 사용자 API 키 조회
+    const { data: userData } = await supabase
+      .from('users')
+      .select('api_key')
+      .eq('id', user.id)
       .single();
+
+    // 프로젝트 소유권 확인 (External API)
+    const project = await lookupRepository(user.id, undefined, undefined, userData?.api_key);
 
     if (!project) {
       return new NextResponse(null, { status: 404 });
@@ -172,19 +175,13 @@ export async function GET(request: NextRequest) {
       userData = userDataResult;
     }
 
-    // 프로젝트 조회 (projectHash 또는 projectId로)
-    let projectQuery = supabase
-      .from('repositories')
-      .select('id, repo_name, repo_hash')
-      .eq('user_id', userId);
-
-    if (projectHash) {
-      projectQuery = projectQuery.eq('repo_hash', projectHash);
-    } else if (projectId) {
-      projectQuery = projectQuery.eq('id', projectId);
-    }
-
-    const { data: project } = await projectQuery.single();
+    // 프로젝트 조회 (External API 사용)
+    const project = await lookupRepository(
+      userId,
+      projectHash || undefined,
+      undefined, // projectId로는 검색하지 않음 (hash 또는 name으로만)
+      userData.api_key
+    );
 
     if (!project) {
       return NextResponse.json(

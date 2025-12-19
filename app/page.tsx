@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, Users, GitBranch, Brain, TrendingUp, FileSearch, BarChart3 } from "lucide-react"
+import { ArrowRight, Users, Brain, FileSearch, BarChart3 } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 
 export default function Home() {
@@ -175,11 +175,13 @@ export default function Home() {
                 <div className="order-1 lg:order-2">
                   <Card className="border-2 border-border/50 bg-card/50 overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[4/3] bg-gradient-to-br from-secondary/20 via-primary/20 to-accent/20 flex items-center justify-center">
-                        <div className="text-center p-8">
-                          <TrendingUp className="h-20 w-20 mx-auto mb-4 text-secondary/60" />
-                          <p className="text-sm text-muted-foreground">성장 추적 그래프</p>
-                        </div>
+                      <div className="aspect-[4/3] relative">
+                        <Image
+                          src="/task-analysis.png"
+                          alt="상세 통계 - 작업 분석 보고서"
+                          fill
+                          className="object-cover object-top"
+                        />
                       </div>
                     </CardContent>
                   </Card>

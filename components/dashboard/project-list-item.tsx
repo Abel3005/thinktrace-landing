@@ -2,11 +2,12 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Settings, Trash2, Loader2 } from "lucide-react"
+import { FolderGit2, GitCommit, Sparkles, FileEdit, TrendingUp, TrendingDown, Settings, Trash2, Loader2, ExternalLink } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { DownloadModal } from './download-modal'
 import {
   Dialog,
@@ -38,9 +39,14 @@ interface ProjectListItemProps {
 }
 
 export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemProps) {
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleCardClick = () => {
+    router.push(`/dashboard/projects/${project.repo_id}`);
+  };
 
   const lastUpdated = formatDistanceToNow(new Date(project.updated_at), {
     addSuffix: true,
@@ -76,7 +82,10 @@ export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemPr
 
   return (
     <>
-      <Card className="border-border/50 bg-card/50">
+      <Card
+        className="border-border/50 bg-card/50 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md"
+        onClick={handleCardClick}
+      >
         <CardContent className="p-6">
         <div className="flex flex-col gap-4">
           {/* 헤더 */}
@@ -87,7 +96,8 @@ export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemPr
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg truncate">{project.repo_name}</h3>
+                  <h3 className="font-semibold text-lg truncate hover:text-primary transition-colors">{project.repo_name}</h3>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   {project.interaction_count > 1 ? (
                     <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
                       테스트 완료
@@ -112,7 +122,10 @@ export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemPr
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setModalOpen(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalOpen(true);
+                }}
               >
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline ml-1">환경 설정</span>
@@ -120,7 +133,10 @@ export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemPr
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setDeleteDialogOpen(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteDialogOpen(true);
+                }}
                 className="text-red-500 hover:text-red-600 hover:border-red-500/50"
               >
                 <Trash2 className="h-4 w-4" />

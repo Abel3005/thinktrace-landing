@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
 import { DownloadButton } from './download-button'
-import { WorkTreeView } from './work-tree-view'
+import { TopTasksReport } from './top-tasks-report'
 import {
   Dialog,
   DialogContent,
@@ -155,10 +155,9 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
         </Card>
       </div>
 
-      {/* 작업 그룹 기반 보고서 */}
-      <WorkTreeView
+      {/* 주요 작업 분석 보고서 */}
+      <TopTasksReport
         projectId={project.id}
-        interactions={interactions}
         apiKey={apiKey}
       />
 

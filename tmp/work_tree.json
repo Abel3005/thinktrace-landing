@@ -1,0 +1,480 @@
+{
+  "cache": {
+    "task_hashes": {
+      "task_0": "41995d6670933c9e",
+      "task_2": "0075a6f51a5d0303",
+      "task_6": "446fef48cba40bde"
+    },
+    "gap_analyses": {
+      "86": {
+        "intent": "기획사항 반영 점검",
+        "status": "FAIL",
+        "outcome": "파일 변경 없음, 점검 결과 불명확",
+        "gap_reason": "점검 요청했으나 결과나 분석이 제공되지 않음"
+      },
+      "87": {
+        "intent": "프로젝트 개념 재정의",
+        "status": "PARTIAL",
+        "outcome": "파일 변경 없음, 개념 정리만 진행",
+        "gap_reason": "개념 설명은 했으나 문서화나 구체적 반영 없음"
+      },
+      "88": {
+        "intent": "사용자 작업 포함 요구",
+        "status": "FAIL",
+        "outcome": "파일 변경 없음, 요구사항만 전달",
+        "gap_reason": "요구사항 반영이나 구현 작업이 수행되지 않음"
+      },
+      "89": {
+        "intent": "MECE 구성 재검토",
+        "status": "FAIL",
+        "outcome": "파일 변경 없음, 대조 작업 미완료",
+        "gap_reason": "기획 대조 및 MECE 구성 작업이 실행되지 않음"
+      },
+      "90": {
+        "intent": "A방식 채택 결정",
+        "status": "FAIL",
+        "outcome": "파일 변경 없음, 결정사항 미반영",
+        "gap_reason": "결정된 A방식에 대한 구체적 적용이나 문서화 없음"
+      }
+    }
+  },
+  "stats": {
+    "new_analyses": 5,
+    "cached_analyses": 0,
+    "total_interactions": 9
+  },
+  "top_tasks": [
+    {
+      "actor": "ai",
+      "persona": {
+        "bloom": "이해",
+        "persona": "지식 번역가",
+        "core_skill": "주석/문서화"
+      },
+      "task_id": "task_2",
+      "category": "docs",
+      "task_name": "프로젝트 기획 검토",
+      "commit_count": 10,
+      "effort_score": 100.38,
+      "gap_analysis": {
+        "intent": "프로젝트 기획 검토",
+        "status": "FAIL",
+        "outcome": "5개 중 0개 성공",
+        "gap_reason": "점검 요청했으나 결과나 분석이 제공되지 않음; 개념 설명은 했으나 문서화나 구체적 반영 없음; 요구사항 반영이나 구현 작업이 수행되지 않음",
+        "success_rate": 10
+      },
+      "ai_commit_count": 5,
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "41eaa0d",
+            "step": 1,
+            "actor": "user",
+            "message": "tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐"
+          },
+          {
+            "hash": "e8f6911",
+            "step": 2,
+            "actor": "ai",
+            "message": "tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐"
+          },
+          {
+            "hash": "c4f32f2",
+            "step": 3,
+            "actor": "user",
+            "message": "현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일 변경상황을 저장하기 위한 일종의 스냅샷에 가까워 커밋메시지도 실제 메시지가 아닌 사용자가 "
+          },
+          {
+            "hash": "05619b1",
+            "step": 4,
+            "actor": "ai",
+            "message": "현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일 변경상황을 저장하기 위한 일종의 스냅샷에 가까워 커밋메시지도 실제 메시지가 아닌 사용자가 "
+          },
+          {
+            "hash": "36e3cce",
+            "step": 5,
+            "actor": "user",
+            "message": "아니야 전체 작업은 사용자가 수정한 내역도 포함해야지"
+          },
+          {
+            "hash": "808e0a8",
+            "step": 6,
+            "actor": "ai",
+            "message": "아니야 전체 작업은 사용자가 수정한 내역도 포함해야지"
+          },
+          {
+            "hash": "7c8b901",
+            "step": 7,
+            "actor": "user",
+            "message": "지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한 것이든 MECE하게 구성되야해"
+          },
+          {
+            "hash": "2d5b280",
+            "step": 8,
+            "actor": "ai",
+            "message": "지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한 것이든 MECE하게 구성되야해"
+          },
+          {
+            "hash": "3700ea6",
+            "step": 9,
+            "actor": "user",
+            "message": "맞아 A 방식으로 가야할 것 같아."
+          },
+          {
+            "hash": "a4f4887",
+            "step": 10,
+            "actor": "ai",
+            "message": "맞아 A 방식으로 ���야할 것 같아."
+          }
+        ],
+        "user_intent": "기획서와 현재 구현된 work-tree 로직 간의 일치성 검증 및 개선방안 도출",
+        "final_outcome": "기획내용과 현재상태 대조분석 완료, A방식으로 개발방향 확정",
+        "execution_flow": "초기 기획검토→프로젝트 개념재정의→작업범위 확장논의→MECE원칙 적용한 전체검토→최종 A방식 결정",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "의존",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "의존",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "수정",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "의존",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "확장",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "의존",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "확장",
+            "from_step": 8
+          },
+          {
+            "to_step": 10,
+            "relation": "의존",
+            "from_step": 9
+          }
+        ]
+      },
+      "task_description": "plan.md 기획사항과 work-tree 로직 비교 검토",
+      "interaction_count": 5,
+      "user_commit_count": 5,
+      "total_lines_changed": 0,
+      "interaction_analyses": [
+        {
+          "intent": "기획사항 반영 점검",
+          "status": "FAIL",
+          "outcome": "파일 변경 없음, 점검 결과 불명확",
+          "gap_reason": "점검 요청했으나 결과나 분석이 제공되지 않음",
+          "interaction_id": 86,
+          "prompt_summary": " tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐"
+        },
+        {
+          "intent": "프로젝트 개념 재정의",
+          "status": "PARTIAL",
+          "outcome": "파일 변경 없음, 개념 정리만 진행",
+          "gap_reason": "개념 설명은 했으나 문서화나 구체적 반영 없음",
+          "interaction_id": 87,
+          "prompt_summary": " 현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일 변경상황을 저장하기 위한 일종의 스냅샷에 가까워 커밋메시지도 실제 메시지가 아닌 사용자가"
+        },
+        {
+          "intent": "사용자 작업 포함 요구",
+          "status": "FAIL",
+          "outcome": "파일 변경 없음, 요구사항만 전달",
+          "gap_reason": "요구사항 반영이나 구현 작업이 수행되지 않음",
+          "interaction_id": 88,
+          "prompt_summary": " 아니야 전체 작업은 사용자가 수정한 내역도 포함해야지"
+        },
+        {
+          "intent": "MECE 구성 재검토",
+          "status": "FAIL",
+          "outcome": "파일 변경 없음, 대조 작업 미완료",
+          "gap_reason": "기획 대조 및 MECE 구성 작업이 실행되지 않음",
+          "interaction_id": 89,
+          "prompt_summary": " 지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한 것이든 MECE하게 구성되야해"
+        },
+        {
+          "intent": "A방식 채택 결정",
+          "status": "FAIL",
+          "outcome": "파일 변경 없음, 결정사항 미반영",
+          "gap_reason": "결정된 A방식에 대한 구체적 적용이나 문서화 없음",
+          "interaction_id": 90,
+          "prompt_summary": " 맞아 A 방식으로 가야할 것 같아."
+        }
+      ],
+      "total_duration_minutes": 3.75
+    },
+    {
+      "actor": "user",
+      "persona": {
+        "bloom": "분석",
+        "persona": "엣지 케이스 탐험가",
+        "core_skill": "예외/테스트 설계"
+      },
+      "task_id": "task_6",
+      "category": "test",
+      "task_name": "데이터 저장 검증",
+      "commit_count": 9,
+      "effort_score": 85.44,
+      "gap_analysis": {
+        "intent": "데이터 저장 검증",
+        "status": "MANUAL",
+        "outcome": "[AUTO-PRE] \\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 비교를 하지 않고 있어, [AUTO-POST] \\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 비교를 하지 않고 있어, [AUTO-PRE] 맨 마지막 데이터들을 확인해 보면 이렇게 저장되어 있어",
+        "gap_reason": null,
+        "success_rate": null
+      },
+      "ai_commit_count": 4,
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "a3b8f1d",
+            "step": 1,
+            "actor": "user",
+            "message": "\\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 비"
+          },
+          {
+            "hash": "64d80ef",
+            "step": 2,
+            "actor": "ai",
+            "message": "\\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 비"
+          },
+          {
+            "hash": "d48fc8c",
+            "step": 3,
+            "actor": "user",
+            "message": "맨 마지막 데이터들을 확인해 보면 이렇게 저장되어 있어"
+          },
+          {
+            "hash": "c4eeac8",
+            "step": 4,
+            "actor": "user",
+            "message": "지금은file_contents의 content 말하는 거야"
+          },
+          {
+            "hash": "877a8c5",
+            "step": 5,
+            "actor": "ai",
+            "message": "지금은file_contents의 content 말하는 거야"
+          },
+          {
+            "hash": "4ef2e41",
+            "step": 6,
+            "actor": "user",
+            "message": "/api/interactions POST 함수 비교할 때야"
+          },
+          {
+            "hash": "a676d95",
+            "step": 7,
+            "actor": "ai",
+            "message": "/api/interactions POST 함수 비교할 때야"
+          },
+          {
+            "hash": "92b50ce",
+            "step": 8,
+            "actor": "user",
+            "message": "마지막 데이터를 가져와 봐"
+          },
+          {
+            "hash": "ec2c34e",
+            "step": 9,
+            "actor": "ai",
+            "message": "마지막 데이터를 가져와 봐"
+          }
+        ],
+        "user_intent": "데이터 저장 시 hex 형태로 저장되는 문제를 해결하고 올바른 데이터 형태로 저장되는지 검증",
+        "final_outcome": "데이터 저장 문제의 원인을 특정하고 실제 저장된 데이터 상태 파악 완료",
+        "execution_flow": "hex 데이터 문제 발견 → 데이터 범위 명확화 → API 함수 특정 → 실제 저장된 데이터 확인으로 단계적 디버깅 진행",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "의존",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "확장",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "의존",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "확장",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "의존",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "확장",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "의존",
+            "from_step": 8
+          }
+        ]
+      },
+      "task_description": "file_contents 저장 및 압축 데이터 검증",
+      "interaction_count": 4,
+      "user_commit_count": 5,
+      "total_lines_changed": 0,
+      "interaction_analyses": [],
+      "total_duration_minutes": 4.38
+    },
+    {
+      "actor": "ai",
+      "persona": {
+        "bloom": "적용",
+        "persona": "기능 구현 전문가",
+        "core_skill": "비즈니스 로직 구현"
+      },
+      "task_id": "task_0",
+      "category": "feature",
+      "task_name": "데이터 분석 및 파싱",
+      "commit_count": 8,
+      "effort_score": 40,
+      "gap_analysis": {
+        "intent": "데이터 분석 및 파싱",
+        "status": "NO_DATA",
+        "outcome": "[AUTO-PRE] 해당 파일을 분석해서 사용자와assistant 간의 대화 맥락을 파악하기 위한 데이터를 추리기 위해서 어떻게 데이터를 파싱해야 하는지 생각해봐, [AUTO-POST] 해당 파일을 분석해서 사용자와assistant 간의 대화 맥락을 파악하기 위한 데이터를 추리기 위해서 어떻게 데이터를 파싱해야 하는지 생각해봐, [AUTO-PRE] 응 파싱해서 정리된 파일 만들어줘",
+        "gap_reason": null,
+        "success_rate": null
+      },
+      "ai_commit_count": 4,
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "112e6dd",
+            "step": 1,
+            "actor": "user",
+            "message": "해당 파일을 분석해서 사용자와assistant 간의 대화 맥락을 파악하기 위한 데이터를 추리기 위해서 어떻게 데이터를 파싱해야 하는지 생각해봐"
+          },
+          {
+            "hash": "1eece54",
+            "step": 2,
+            "actor": "ai",
+            "message": "해당 파일을 분석해서 사용자와assistant 간의 대화 맥락을 파악하기 위한 데이터를 추리기 위해서 어떻게 데이터를 파싱해야 하는지 생각해봐"
+          },
+          {
+            "hash": "6b1bca9",
+            "step": 3,
+            "actor": "user",
+            "message": "응 파싱해서 정리된 파일 만들어줘"
+          },
+          {
+            "hash": "b4779f6",
+            "step": 4,
+            "actor": "ai",
+            "message": "응 파싱해서 정리된 파일 만들어줘"
+          },
+          {
+            "hash": "be12571",
+            "step": 5,
+            "actor": "user",
+            "message": "핵심 대화만 추출한 문서 만들어줘"
+          },
+          {
+            "hash": "72eeabd",
+            "step": 6,
+            "actor": "ai",
+            "message": "핵심 대화만 추출한 문서 만들어줘"
+          },
+          {
+            "hash": "d3c618c",
+            "step": 7,
+            "actor": "user",
+            "message": "해당 파일을 만들기 위해서 메시지를 어떻게 전처리 했는지 설명해줘"
+          },
+          {
+            "hash": "1f7487a",
+            "step": 8,
+            "actor": "ai",
+            "message": "해당 파일을 만들기 위해서 메시지를 어떻게 전처리 했는지 설명해줘"
+          }
+        ],
+        "user_intent": "대화 데이터에서 사용자와 AI 간의 핵심 대화 맥락을 파악할 수 있는 정리된 문서 생성",
+        "final_outcome": "핵심 대화가 추출된 정리 문서와 전���리 방법론이 문서화된 결과물 완성",
+        "execution_flow": "데이터 파싱 방법론 검토 → 실제 파싱 및 정리 파일 생성 → 핵심 대화만 추출한 요약본 제작 → 전처리 과정 문서화",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "의존",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "의존",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "확장",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "의존",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "확장",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "의존",
+            "from_step": 7
+          }
+        ]
+      },
+      "task_description": "사용자-assistant 대화 데이터 분석 및 파싱 작업",
+      "interaction_count": 0,
+      "user_commit_count": 4,
+      "total_lines_changed": 0,
+      "interaction_analyses": [],
+      "total_duration_minutes": 0
+    }
+  ],
+  "analyzed_at": "2025-12-19T08:38:01.929595"
+}

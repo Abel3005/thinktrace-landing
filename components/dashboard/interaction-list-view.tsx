@@ -9,6 +9,8 @@ import { ko } from 'date-fns/locale'
 import type { AIInteraction, ConversationMessage } from '@/lib/api/types'
 import { fetchInteractionMessages } from '@/lib/api/client'
 import { DiffViewer, type FileChange } from './diff-viewer'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface InteractionListViewProps {
   interactions: AIInteraction[];
@@ -273,9 +275,11 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
                             ? 'bg-blue-500/5 border border-blue-500/20'
                             : 'bg-primary/5 border border-primary/20'
                         }`}>
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                            {message.content}
-                          </p>
+                          <div className="markdown-content">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
                         </div>
                       </div>
                     </div>

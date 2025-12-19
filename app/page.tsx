@@ -90,48 +90,50 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 기능 2: 사고 과정 추적 */}
+              {/* 기능 2: 작업 분석 */}
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 <div className="order-1">
                   <Card className="border-2 border-border/50 bg-card/50 overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[4/3] bg-gradient-to-br from-accent/20 via-primary/20 to-secondary/20 flex items-center justify-center">
-                        <div className="text-center p-8">
-                          <Brain className="h-20 w-20 mx-auto mb-4 text-accent/60" />
-                          <p className="text-sm text-muted-foreground">사고 패턴 분석</p>
-                        </div>
+                      <div className="aspect-[4/3] relative">
+                        <Image
+                          src="/work-tree.png"
+                          alt="작업 그룹별 상세 분석 - Work-tree 화면"
+                          fill
+                          className="object-cover object-top"
+                        />
                       </div>
                     </CardContent>
                   </Card>
                 </div>
                 <div className="space-y-6 order-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium">
-                    <Brain className="h-4 w-4" />
-                    사고 과정 추적
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                    <FileSearch className="h-4 w-4" />
+                    작업 분석
                   </div>
-                  <h3 className="text-3xl font-bold">AI 활용 패턴을 분석합니다</h3>
+                  <h3 className="text-3xl font-bold">작업 그룹별 상세 분석</h3>
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    AI를 활용하는 사람의 사고과정을 추적하여 의미있는 패턴을 찾아냅니다.
-                    문제 해결 방식, 프롬프트 작성 스타일, 코드 개선 전략 등을 종합적으로 분석합니다.
+                    프로젝트 내 작업들을 의미있는 그룹으로 분류하고, 각 작업의 목적과 과정을 분석합니다.
+                    AI 기반 작업과 수동 작업을 구분하여 효율성을 평가합니다.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-start gap-2">
-                      <div className="mt-1 rounded-full bg-accent/20 p-1">
-                        <div className="h-2 w-2 rounded-full bg-accent-foreground" />
+                      <div className="mt-1 rounded-full bg-primary/20 p-1">
+                        <div className="h-2 w-2 rounded-full bg-primary" />
                       </div>
-                      <span className="text-muted-foreground">커밋 히스토리 기반 작업 흐름 추적</span>
+                      <span className="text-muted-foreground">작업 그룹 자동 분류</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="mt-1 rounded-full bg-accent/20 p-1">
-                        <div className="h-2 w-2 rounded-full bg-accent-foreground" />
+                      <div className="mt-1 rounded-full bg-primary/20 p-1">
+                        <div className="h-2 w-2 rounded-full bg-primary" />
                       </div>
-                      <span className="text-muted-foreground">AI 인터랙션 패턴 시각화</span>
+                      <span className="text-muted-foreground">커밋별 상세 정보 제공</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="mt-1 rounded-full bg-accent/20 p-1">
-                        <div className="h-2 w-2 rounded-full bg-accent-foreground" />
+                      <div className="mt-1 rounded-full bg-primary/20 p-1">
+                        <div className="h-2 w-2 rounded-full bg-primary" />
                       </div>
-                      <span className="text-muted-foreground">문제 해결 전략 평가</span>
+                      <span className="text-muted-foreground">AI 프롬프트 이력 추적</span>
                     </li>
                   </ul>
                 </div>
@@ -184,50 +186,48 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 기능 4: 작업 분석 */}
+              {/* 기능 4: 사고 과정 추적 */}
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 <div className="order-1">
                   <Card className="border-2 border-border/50 bg-card/50 overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[4/3] relative">
-                        <Image
-                          src="/work-tree.png"
-                          alt="작업 그룹별 상세 분석 - Work-tree 화면"
-                          fill
-                          className="object-cover object-top"
-                        />
+                      <div className="aspect-[4/3] bg-gradient-to-br from-accent/20 via-primary/20 to-secondary/20 flex items-center justify-center">
+                        <div className="text-center p-8">
+                          <Brain className="h-20 w-20 mx-auto mb-4 text-accent/60" />
+                          <p className="text-sm text-muted-foreground">사고 패턴 분석</p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
                 <div className="space-y-6 order-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                    <FileSearch className="h-4 w-4" />
-                    작업 분석
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium">
+                    <Brain className="h-4 w-4" />
+                    사고 과정 추적
                   </div>
-                  <h3 className="text-3xl font-bold">작업 그룹별 상세 분석</h3>
+                  <h3 className="text-3xl font-bold">AI 활용 패턴을 분석합니다</h3>
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    프로젝트 내 작업들을 의미있는 그룹으로 분류하고, 각 작업의 목적과 과정을 분석합니다.
-                    AI 기반 작업과 수동 작업을 구분하여 효율성을 평가합니다.
+                    AI를 활용하는 사람의 사고과정을 추적하여 의미있는 패턴을 찾아냅니다.
+                    문제 해결 방식, 프롬프트 작성 스타일, 코드 개선 전략 등을 종합적으로 분석합니다.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-start gap-2">
-                      <div className="mt-1 rounded-full bg-primary/20 p-1">
-                        <div className="h-2 w-2 rounded-full bg-primary" />
+                      <div className="mt-1 rounded-full bg-accent/20 p-1">
+                        <div className="h-2 w-2 rounded-full bg-accent-foreground" />
                       </div>
-                      <span className="text-muted-foreground">작업 그룹 자동 분류</span>
+                      <span className="text-muted-foreground">커밋 히스토리 기반 작업 흐름 추적</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="mt-1 rounded-full bg-primary/20 p-1">
-                        <div className="h-2 w-2 rounded-full bg-primary" />
+                      <div className="mt-1 rounded-full bg-accent/20 p-1">
+                        <div className="h-2 w-2 rounded-full bg-accent-foreground" />
                       </div>
-                      <span className="text-muted-foreground">커밋별 상세 정보 제공</span>
+                      <span className="text-muted-foreground">AI 인터랙션 패턴 시각화</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="mt-1 rounded-full bg-primary/20 p-1">
-                        <div className="h-2 w-2 rounded-full bg-primary" />
+                      <div className="mt-1 rounded-full bg-accent/20 p-1">
+                        <div className="h-2 w-2 rounded-full bg-accent-foreground" />
                       </div>
-                      <span className="text-muted-foreground">AI 프롬프트 이력 추적</span>
+                      <span className="text-muted-foreground">문제 해결 전략 평가</span>
                     </li>
                   </ul>
                 </div>

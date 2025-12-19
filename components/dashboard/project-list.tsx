@@ -19,13 +19,17 @@ export function ProjectList({ projects: initialProjects, userId, apiKey }: Proje
     setProjects(prev => prev.filter(p => p.repo_id !== projectId));
   };
 
+  const handleAddProject = (newProject: ProjectStatistics) => {
+    setProjects(prev => [newProject, ...prev]);
+  };
+
   if (!projects || projects.length === 0) {
     return (
       <Card className="border-border/50 bg-card/50">
         <CardContent className="py-12 text-center">
           <FolderGit2 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground mb-4">아직 프로젝트가 없습니다.</p>
-          <AddProjectDialog userId={userId} />
+          <AddProjectDialog userId={userId} onProjectCreated={handleAddProject} />
         </CardContent>
       </Card>
     );
@@ -37,7 +41,7 @@ export function ProjectList({ projects: initialProjects, userId, apiKey }: Proje
         <h2 className="text-2xl font-bold">프로젝트</h2>
         <div className="flex items-center gap-4">
           <p className="text-sm text-muted-foreground">총 {projects.length}개</p>
-          <AddProjectDialog userId={userId} />
+          <AddProjectDialog userId={userId} onProjectCreated={handleAddProject} />
         </div>
       </div>
 

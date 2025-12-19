@@ -17,11 +17,26 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
-interface AddProjectDialogProps {
-  userId: string
+interface CreatedProject {
+  repo_id: number
+  repo_name: string
+  repo_hash: string
+  description?: string
+  commit_count: number
+  interaction_count: number
+  files_changed: number
+  total_insertions: number
+  total_deletions: number
+  created_at: string
+  updated_at: string
 }
 
-export function AddProjectDialog({ userId }: AddProjectDialogProps) {
+interface AddProjectDialogProps {
+  userId: string
+  onProjectCreated?: (project: CreatedProject) => void
+}
+
+export function AddProjectDialog({ userId, onProjectCreated }: AddProjectDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -50,11 +65,31 @@ export function AddProjectDialog({ userId }: AddProjectDialogProps) {
         throw new Error("Failed to create project")
       }
 
+      const data = await response.json()
+
+      // Notify parent component with new project
+      if (onProjectCreated && data.project) {
+        const newProject: CreatedProject = {
+          repo_id: data.project.id,
+          repo_name: data.project.repo_name,
+          repo_hash: data.project.repo_hash || data.hash,
+          description: data.project.description,
+          commit_count: 0,
+          interaction_count: 0,
+          files_changed: 0,
+          total_insertions: 0,
+          total_deletions: 0,
+          created_at: data.project.created_at,
+          updated_at: data.project.updated_at,
+        }
+        onProjectCreated(newProject)
+      }
+
       // Reset form and close dialog
       setFormData({ name: "", description: "" })
       setOpen(false)
 
-      // Refresh the page to show new project
+      // Refresh the page to sync server state
       router.refresh()
     } catch (error) {
       console.error("Error creating project:", error)

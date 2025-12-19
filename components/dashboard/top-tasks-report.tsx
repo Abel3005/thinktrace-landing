@@ -23,14 +23,19 @@ import {
   Target,
   Flag,
   Workflow,
-  GitCommit
+  GitCommit,
+  Code,
+  Lightbulb,
+  ThumbsUp,
+  ThumbsDown,
+  BookOpen
 } from "lucide-react"
 
 interface TopTask {
   task_id: string;
   task_name: string;
+  task_description?: string;
   category: string;
-  actor: 'ai' | 'user';
   persona: {
     bloom: string;
     persona: string;
@@ -38,20 +43,30 @@ interface TopTask {
   };
   effort_score: number;
   commit_count: number;
-  ai_commit_count: number;
-  user_commit_count: number;
+  interaction_count?: number;
+  total_lines_changed?: number;
   gap_analysis: {
     intent: string;
-    status: 'FAIL' | 'PARTIAL' | 'MANUAL' | 'NO_DATA' | 'SUCCESS';
+    status: 'FAIL' | 'PARTIAL' | 'MANUAL' | 'NO_DATA' | 'SUCCESS' | 'CONTEXT';
     outcome: string;
     gap_reason: string | null;
     success_rate: number | null;
+    type_breakdown?: {
+      change_count: number;
+      context_count: number;
+      status_counts: {
+        FAIL: number;
+        CONTEXT: number;
+        PARTIAL: number;
+        SUCCESS: number;
+        UNKNOWN: number;
+      };
+    };
   };
   thought_process: {
     commit_flow: Array<{
       hash: string;
       step: number;
-      actor: 'user' | 'ai';
       message: string;
     }>;
     user_intent: string;
@@ -62,6 +77,11 @@ interface TopTask {
       to_step: number;
       relation: string;
     }>;
+    improvement_feedback?: {
+      suggestions: string[];
+      flow_assessment: string;
+      is_flow_appropriate: boolean;
+    };
   };
   interaction_analyses: Array<{
     interaction_id: number;
@@ -69,7 +89,8 @@ interface TopTask {
     intent: string;
     status: string;
     outcome: string;
-    gap_reason: string;
+    gap_reason: string | null;
+    interaction_type?: 'change' | 'context';
   }>;
   total_duration_minutes: number;
 }
@@ -307,20 +328,23 @@ function TaskReportCard({ task, rank, expanded, onToggle }: TaskReportCardProps)
 
             <div className="flex-1 min-w-0">
               {/* 작업명 + 배지들 */}
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <h4 className="font-bold text-lg">{task.task_name}</h4>
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getCategoryStyle(task.category)}`}>
                   {task.category}
                 </span>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 ${
-                  task.actor === 'ai'
-                    ? 'bg-violet-500/10 text-violet-500'
-                    : 'bg-sky-500/10 text-sky-500'
-                }`}>
-                  {task.actor === 'ai' ? <Bot className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                  {task.actor === 'ai' ? 'AI 주도' : '사용자 주도'}
-                </span>
+                {task.persona && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-500 flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" />
+                    {task.persona.bloom} · {task.persona.persona}
+                  </span>
+                )}
               </div>
+
+              {/* 작업 설명 */}
+              {task.task_description && (
+                <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{task.task_description}</p>
+              )}
 
               {/* 메타 정보 */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
@@ -338,6 +362,12 @@ function TaskReportCard({ task, rank, expanded, onToggle }: TaskReportCardProps)
                   <GitCommit className="h-4 w-4 text-muted-foreground" />
                   <span>{task.commit_count}개 커밋</span>
                 </div>
+                {task.total_lines_changed && task.total_lines_changed > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Code className="h-4 w-4 text-muted-foreground" />
+                    <span>{task.total_lines_changed.toLocaleString()}줄 변경</span>
+                  </div>
+                )}
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${getStatusStyle(task.gap_analysis.status)}`}>
                   {getStatusIcon(task.gap_analysis.status)}
                   {getStatusLabel(task.gap_analysis.status)}
@@ -415,12 +445,52 @@ function TaskReportCard({ task, rank, expanded, onToggle }: TaskReportCardProps)
 
           {/* 피드백 섹션 */}
           {task.gap_analysis.gap_reason && (
-            <div className="px-6 py-4 bg-destructive/5 border-t border-border/50">
-              <h5 className="text-sm font-semibold text-destructive mb-2 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                개선 필요 사항
+            <div className="px-6 py-4 bg-accent/5 border-t border-border/50">
+              <h5 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                작업 결과 요약
               </h5>
-              <p className="text-sm text-destructive/90 leading-relaxed">{task.gap_analysis.gap_reason}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{task.gap_analysis.gap_reason}</p>
+            </div>
+          )}
+
+          {/* 개선 피드백 섹션 */}
+          {task.thought_process.improvement_feedback && (
+            <div className="px-6 py-4 border-t border-border/50">
+              <h5 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                {task.thought_process.improvement_feedback.is_flow_appropriate ? (
+                  <ThumbsUp className="h-4 w-4 text-green-500" />
+                ) : (
+                  <ThumbsDown className="h-4 w-4 text-amber-500" />
+                )}
+                작업 흐름 평가
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  task.thought_process.improvement_feedback.is_flow_appropriate
+                    ? 'bg-green-500/10 text-green-500'
+                    : 'bg-amber-500/10 text-amber-500'
+                }`}>
+                  {task.thought_process.improvement_feedback.is_flow_appropriate ? '적절함' : '개선 필요'}
+                </span>
+              </h5>
+              <p className="text-sm text-muted-foreground mb-3">
+                {task.thought_process.improvement_feedback.flow_assessment}
+              </p>
+              {task.thought_process.improvement_feedback.suggestions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                    개선 제안
+                  </p>
+                  <ul className="space-y-1.5">
+                    {task.thought_process.improvement_feedback.suggestions.map((suggestion, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <span className="text-primary mt-1">•</span>
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -464,7 +534,6 @@ interface CommitFlowTimelineProps {
   commitFlow: Array<{
     hash: string;
     step: number;
-    actor: 'user' | 'ai';
     message: string;
   }>;
   commitRelations: Array<{
@@ -475,35 +544,29 @@ interface CommitFlowTimelineProps {
 }
 
 function CommitFlowTimeline({ commitFlow, commitRelations }: CommitFlowTimelineProps) {
-  // 연속된 user/ai 쌍을 합치기 (같은 메시지인 경우)
+  // 연속된 단계를 쌍으로 합치기 (홀수: 사용자 요청, 짝수: AI 응답)
   const mergedFlow: Array<{
-    userCommit: typeof commitFlow[0];
-    aiCommit?: typeof commitFlow[0];
+    userStep: typeof commitFlow[0];
+    aiStep?: typeof commitFlow[0];
     nextRelation: string | null;
+    stepNumber: number;
   }> = [];
 
-  for (let i = 0; i < commitFlow.length; i++) {
-    const current = commitFlow[i];
-    const next = commitFlow[i + 1];
+  for (let i = 0; i < commitFlow.length; i += 2) {
+    const userStep = commitFlow[i];
+    const aiStep = commitFlow[i + 1];
 
-    // user 다음에 ai가 오고, 메시지가 같으면 합치기
-    if (current.actor === 'user' && next?.actor === 'ai') {
-      const aiRelation = commitRelations.find(r => r.from_step === next.step);
-      mergedFlow.push({
-        userCommit: current,
-        aiCommit: next,
-        nextRelation: aiRelation?.relation || null,
-      });
-      i++; // ai는 건너뛰기
-    } else if (current.actor === 'user') {
-      // user만 있는 경우
-      const relation = commitRelations.find(r => r.from_step === current.step);
-      mergedFlow.push({
-        userCommit: current,
-        nextRelation: relation?.relation || null,
-      });
-    }
-    // ai만 있는 경우는 무시 (이미 합쳐졌거나 독립적인 ai는 드묾)
+    // 다음 관계 찾기 (AI step에서 다음으로의 관계)
+    const nextRelation = aiStep
+      ? commitRelations.find(r => r.from_step === aiStep.step)?.relation || null
+      : commitRelations.find(r => r.from_step === userStep.step)?.relation || null;
+
+    mergedFlow.push({
+      userStep,
+      aiStep,
+      nextRelation,
+      stepNumber: Math.ceil((i + 1) / 2),
+    });
   }
 
   const getRelationColor = (relation: string) => {
@@ -511,7 +574,18 @@ function CommitFlowTimeline({ commitFlow, commitRelations }: CommitFlowTimelineP
       case '의존': return 'text-blue-500';
       case '확장': return 'text-green-500';
       case '수정': return 'text-amber-500';
+      case '독립': return 'text-gray-500';
       default: return 'text-muted-foreground';
+    }
+  };
+
+  const getRelationBg = (relation: string) => {
+    switch (relation) {
+      case '의존': return 'bg-blue-500/10';
+      case '확장': return 'bg-green-500/10';
+      case '수정': return 'bg-amber-500/10';
+      case '독립': return 'bg-gray-500/10';
+      default: return 'bg-muted';
     }
   };
 
@@ -521,8 +595,8 @@ function CommitFlowTimeline({ commitFlow, commitRelations }: CommitFlowTimelineP
       <div className="absolute left-3 top-0 bottom-0 w-px bg-border/50" />
 
       <div className="space-y-4">
-        {mergedFlow.map((item) => (
-          <div key={item.userCommit.hash} className="relative">
+        {mergedFlow.map((item, idx) => (
+          <div key={item.userStep.hash} className="relative">
             {/* 타임라인 노드 */}
             <div className="absolute -left-3 w-6 h-6 rounded-full flex items-center justify-center bg-primary/20 text-primary">
               <MessageSquare className="h-3 w-3" />
@@ -532,29 +606,34 @@ function CommitFlowTimeline({ commitFlow, commitRelations }: CommitFlowTimelineP
             <div className="ml-4 p-3 rounded-lg bg-card border border-border/50">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-xs font-mono text-muted-foreground">
-                  #{Math.ceil(item.userCommit.step / 2)}
+                  #{item.stepNumber}
                 </span>
                 <div className="flex items-center gap-1">
                   <User className="h-3 w-3 text-blue-500" />
-                  <span className="text-xs text-blue-500">사용자</span>
+                  <span className="text-xs text-blue-500">요청</span>
                 </div>
-                {item.aiCommit && (
+                {item.aiStep && (
                   <>
                     <ArrowRight className="h-3 w-3 text-muted-foreground" />
                     <div className="flex items-center gap-1">
                       <Bot className="h-3 w-3 text-purple-500" />
-                      <span className="text-xs text-purple-500">AI</span>
+                      <span className="text-xs text-purple-500">응답</span>
                     </div>
                   </>
                 )}
+                <span className="text-xs font-mono text-muted-foreground/60">
+                  {item.userStep.hash.substring(0, 7)}
+                </span>
               </div>
-              <p className="text-sm line-clamp-2">{item.userCommit.message}</p>
+              <p className="text-sm line-clamp-2">{item.userStep.message}</p>
 
-              {/* AI와 다음 단계의 관계 */}
-              {item.nextRelation && (
-                <div className={`flex items-center gap-1 mt-2 pt-2 border-t border-border/50 ${getRelationColor(item.nextRelation)}`}>
-                  <ArrowRight className="h-3 w-3" />
-                  <span className="text-xs font-medium">다음 단계와 {item.nextRelation} 관계</span>
+              {/* 다음 단계와의 관계 */}
+              {item.nextRelation && idx < mergedFlow.length - 1 && (
+                <div className={`flex items-center gap-1.5 mt-2 pt-2 border-t border-border/50`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${getRelationBg(item.nextRelation)} ${getRelationColor(item.nextRelation)}`}>
+                    {item.nextRelation}
+                  </span>
+                  <ArrowRight className={`h-3 w-3 ${getRelationColor(item.nextRelation)}`} />
                 </div>
               )}
             </div>
@@ -572,7 +651,8 @@ interface InteractionAnalysisCardProps {
     intent: string;
     status: string;
     outcome: string;
-    gap_reason: string;
+    gap_reason: string | null;
+    interaction_type?: 'change' | 'context';
   };
 }
 
@@ -582,6 +662,7 @@ function InteractionAnalysisCard({ analysis }: InteractionAnalysisCardProps) {
       case 'SUCCESS': return 'bg-green-500/10 text-green-500';
       case 'PARTIAL': return 'bg-yellow-500/10 text-yellow-500';
       case 'FAIL': return 'bg-red-500/10 text-red-500';
+      case 'CONTEXT': return 'bg-blue-500/10 text-blue-500';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -591,22 +672,44 @@ function InteractionAnalysisCard({ analysis }: InteractionAnalysisCardProps) {
       case 'SUCCESS': return '성공';
       case 'PARTIAL': return '부분';
       case 'FAIL': return '실패';
+      case 'CONTEXT': return '맥락';
       default: return status;
+    }
+  };
+
+  const getTypeStyle = (type?: string) => {
+    switch (type) {
+      case 'change': return 'bg-purple-500/10 text-purple-500';
+      case 'context': return 'bg-cyan-500/10 text-cyan-500';
+      default: return '';
+    }
+  };
+
+  const getTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'change': return '변경';
+      case 'context': return '맥락';
+      default: return null;
     }
   };
 
   return (
     <div className="p-3 rounded-lg bg-card border border-border/50">
-      <div className="flex items-center gap-2 mb-1.5">
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
         <span className="text-xs font-mono text-muted-foreground">#{analysis.interaction_id}</span>
         <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${getStatusStyle(analysis.status)}`}>
           {getStatusLabel(analysis.status)}
         </span>
+        {analysis.interaction_type && getTypeLabel(analysis.interaction_type) && (
+          <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${getTypeStyle(analysis.interaction_type)}`}>
+            {getTypeLabel(analysis.interaction_type)}
+          </span>
+        )}
       </div>
       <p className="text-sm font-medium mb-0.5">{analysis.intent}</p>
       <p className="text-xs text-muted-foreground line-clamp-1">{analysis.prompt_summary}</p>
       {analysis.gap_reason && (
-        <p className="text-xs text-red-500 mt-1.5 pt-1.5 border-t border-border/50">
+        <p className="text-xs text-green-600 mt-1.5 pt-1.5 border-t border-border/50">
           {analysis.gap_reason}
         </p>
       )}

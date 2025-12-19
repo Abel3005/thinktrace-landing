@@ -1,0 +1,747 @@
+{
+  "cache": {
+    "task_hashes": {
+      "task_1": "0a3954f3b0022864",
+      "task_5": "69654cd4f101fed4",
+      "task_7": "d9cf3d997a735ffd"
+    },
+    "gap_analyses": {
+      "96": {
+        "intent": "AI 상호작용 대화 내역 표시",
+        "status": "SUCCESS",
+        "outcome": "대화 표시 컴포넌트, API 클라이언트, 타입 정의 구현",
+        "gap_reason": "대화 내역 표시 기능이 완전히 구현됨",
+        "interaction_type": "change"
+      },
+      "105": {
+        "intent": "마크다운 형식 메시지 보기좋게 출력",
+        "status": "SUCCESS",
+        "outcome": "interaction-list-view.tsx에서 7줄 추가로 마크다운 렌더링",
+        "gap_reason": "마크다운 렌더링 기능이 정확히 추가됨",
+        "interaction_type": "change"
+      },
+      "106": {
+        "intent": "\\n 문자열을 실제 줄바꿈으로 처리",
+        "status": "SUCCESS",
+        "outcome": "interaction-list-view.tsx에서 1줄 수정으로 줄바꿈 처리",
+        "gap_reason": "줄바꿈 문자열 변환이 정확히 구현됨",
+        "interaction_type": "change"
+      },
+      "107": {
+        "intent": "메인 홈에 과정중심 평가 이미지 적용",
+        "status": "SUCCESS",
+        "outcome": "app/page.tsx에 264줄 추가하여 이미지 적용 완료",
+        "gap_reason": "요청한 이미지가 메인 홈에 정확히 적용됨",
+        "interaction_type": "change"
+      },
+      "110": {
+        "intent": "이전 논의사항 적용",
+        "status": "SUCCESS",
+        "outcome": "app/page.tsx 7줄 추가/5줄 수정으로 work-tree.png 적용",
+        "gap_reason": "작업 그룹별 분석 섹션에 이미지 정확히 적용됨",
+        "interaction_type": "change"
+      },
+      "111": {
+        "intent": "메인 홈 섹션 순서 변경",
+        "status": "SUCCESS",
+        "outcome": "app/page.tsx 95줄 이동하여 섹션 순서 재배치 완료",
+        "gap_reason": "요청한 순서대로 섹션 배치가 정확히 변경됨",
+        "interaction_type": "change"
+      },
+      "124": {
+        "intent": "작업 데이터 보고서 양식 추가",
+        "status": "SUCCESS",
+        "outcome": "top-tasks-report.tsx 605줄, project-detail-content.tsx 363줄 추가",
+        "gap_reason": "데모 데이터 기반 보고서 컴포넌트 완전히 구현됨",
+        "interaction_type": "change"
+      },
+      "128": {
+        "intent": "데이터 필드명을 top_tasks_analysis로 수정",
+        "status": "SUCCESS",
+        "outcome": "top-tasks-report.tsx에서 데이터 필드명 변경 완료",
+        "gap_reason": "요���한 필드명으로 정확히 수정됨",
+        "interaction_type": "change"
+      },
+      "129": {
+        "intent": "map 함수 에러 해결",
+        "status": "SUCCESS",
+        "outcome": "top-tasks-report.tsx에 배열 방어코드 13줄 추가",
+        "gap_reason": "배열 타입 검증 로직으로 에러 해결됨",
+        "interaction_type": "change"
+      },
+      "136": {
+        "intent": "작업요약 중심으로 UI 개선",
+        "status": "SUCCESS",
+        "outcome": "top-tasks-report.tsx 223줄 추가/242줄 수정으로 UI 재구성",
+        "gap_reason": "작업요약 강조와 밝은 보고서 스타일로 완전 개선됨",
+        "interaction_type": "change"
+      },
+      "137": {
+        "intent": "상세 흐름 UI 개선 및 색상 통일",
+        "status": "SUCCESS",
+        "outcome": "top-tasks-report.tsx 107줄 추가/91줄 수정으로 UI 개선",
+        "gap_reason": "사용자/AI 메시지 통합과 색상 통일 완료됨",
+        "interaction_type": "change"
+      },
+      "138": {
+        "intent": "UI를 이전 다크 테마로 되돌리기",
+        "status": "SUCCESS",
+        "outcome": "top-tasks-report.tsx 파일에서 54줄 변경으로 다크 테마 복원",
+        "gap_reason": "요청한 이전 상태 복원이 정확히 수행됨",
+        "interaction_type": "change"
+      },
+      "140": {
+        "intent": "task-analysis 이미지 적용",
+        "status": "PARTIAL",
+        "outcome": "project-detail-content.tsx에 40줄 추가하여 모달 생성",
+        "gap_reason": "사용자가 원하는 위치와 다르게 구현됨",
+        "interaction_type": "change"
+      },
+      "141": {
+        "intent": "코드 되돌리고 홈화면에 이미지 추가",
+        "status": "SUCCESS",
+        "outcome": "이전 변경사항 롤백 후 홈 화면 세번째 슬롯에 이미지 추가",
+        "gap_reason": "코드 롤백과 홈화면 적용이 정확히 수행됨",
+        "interaction_type": "change"
+      }
+    }
+  },
+  "stats": {
+    "new_analyses": 14,
+    "cached_analyses": 0,
+    "total_interactions": 16,
+    "total_change_interactions": 14
+  },
+  "top_tasks": [
+    {
+      "persona": {
+        "bloom": "적용",
+        "persona": "기능 구현 전문가",
+        "core_skill": "비즈니스 로직 구현"
+      },
+      "task_id": "task_5",
+      "category": "feature",
+      "task_name": "홈페이지 이미지 및 레이아웃 개선",
+      "commit_count": 14,
+      "effort_score": 146.22,
+      "gap_analysis": {
+        "intent": "홈페이지 이미지 및 레이아웃 개선",
+        "status": "PARTIAL",
+        "outcome": "변경 5개 (성공 4), 맥락 2개",
+        "gap_reason": "요청한 이미지가 메인 홈에 정확히 적용됨; 작업 그룹별 분석 섹션에 이미지 정확히 적용됨; 요청한 순서대로 섹션 배치가 정확히 변경됨",
+        "success_rate": 90,
+        "type_breakdown": {
+          "change_count": 5,
+          "context_count": 2,
+          "status_counts": {
+            "FAIL": 0,
+            "CONTEXT": 2,
+            "PARTIAL": 1,
+            "SUCCESS": 4,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "4364085",
+            "step": 1,
+            "message": "public에 있는 tmp/Process-oriented evaluation.png를 메인 홈의 과정중심 평가 이미지로 사용하면 어떨까?"
+          },
+          {
+            "hash": "b40effe",
+            "step": 2,
+            "message": "public에 있는 tmp/Process-oriented evaluation.png를 메인 홈의 과정중심 평가 이미지로 사용하면 어떨까?"
+          },
+          {
+            "hash": "c5f0591",
+            "step": 3,
+            "message": "public/work-tree.png 도 메인 홈의 작업 그룹별 상세 분석 시각 이미지에 적합한지 확인해줘"
+          },
+          {
+            "hash": "fcaf30d",
+            "step": 4,
+            "message": "public/work-tree.png 도 메인 홈의 작업 그룹별 상세 분석 시각 이미지에 적합한지 확인해줘"
+          },
+          {
+            "hash": "0035b72",
+            "step": 5,
+            "message": "적용해"
+          },
+          {
+            "hash": "66ba5ed",
+            "step": 6,
+            "message": "적용해"
+          },
+          {
+            "hash": "1915ade",
+            "step": 7,
+            "message": "메인 홈의 순서를 바꿀게 작업 그룹별 상세 분석을 2번째 부근에 넣고 AI 활용 패턴은 4번째로 넣자"
+          },
+          {
+            "hash": "0d16f7b",
+            "step": 8,
+            "message": "메인 홈의 순서를 바꿀게 작업 그룹별 상세 분석을 2번째 부근에 넣고 AI 활용 패턴은 4번째로 넣자"
+          },
+          {
+            "hash": "b600caa",
+            "step": 9,
+            "message": "tmp/task-anlaysis.png를 세번째 슬롯 시각화 사진에 넣어줘"
+          },
+          {
+            "hash": "dac5804",
+            "step": 10,
+            "message": "tmp/task-anlaysis.png를 세번째 슬롯 시각화 사진에 넣어줘"
+          },
+          {
+            "hash": "6e99657",
+            "step": 11,
+            "message": "task-analysis 야"
+          },
+          {
+            "hash": "cd8c03b",
+            "step": 12,
+            "message": "task-analysis 야"
+          },
+          {
+            "hash": "35a6ccb",
+            "step": 13,
+            "message": "아니야 다시 코드 되돌리고 홈화면의 세번째 슬롯 시각화로 넣어줘"
+          },
+          {
+            "hash": "f099b3e",
+            "step": 14,
+            "message": "아니야 다시 코드 되돌리고 홈화면의 세번째 슬롯 시각화로 넣어줘"
+          }
+        ],
+        "user_intent": "홈페이지의 이미지를 적절한 시각화 이미지로 교체하고 레이아웃 순서를 최적화",
+        "final_outcome": "홈페이지의 세 개 슬롯에 적절한 시각화 이미지가 배치되고 레이아웃 순서가 개선됨",
+        "execution_flow": "이미지 적합성 검토→적용→레이아웃 순서 변경→추가 이미지 적용→오류 수정→최종 배치 조정으로 단계적 진행",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "수정",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "수정",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "의존",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "수정",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "확장",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "수정",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "확장",
+            "from_step": 8
+          },
+          {
+            "to_step": 10,
+            "relation": "수정",
+            "from_step": 9
+          },
+          {
+            "to_step": 11,
+            "relation": "수정",
+            "from_step": 10
+          },
+          {
+            "to_step": 12,
+            "relation": "수정",
+            "from_step": 11
+          },
+          {
+            "to_step": 13,
+            "relation": "수정",
+            "from_step": 12
+          },
+          {
+            "to_step": 14,
+            "relation": "수정",
+            "from_step": 13
+          }
+        ],
+        "improvement_feedback": {
+          "suggestions": [
+            "중복 커밋 방지를 위한 사전 계획 수립",
+            "브랜치 활용으로 실험적 변경 관리"
+          ],
+          "flow_assessment": "중복 커밋과 되돌리기 작업이 많아 비효율적인 흐름",
+          "is_flow_appropriate": false
+        }
+      },
+      "task_description": "메인 홈페이지의 시각화 이미지 추가 및 섹션 순서 재배치",
+      "interaction_count": 7,
+      "total_lines_changed": 562,
+      "interaction_analyses": [
+        {
+          "intent": "메인 홈에 과정중심 평가 이미지 적용",
+          "status": "SUCCESS",
+          "outcome": "app/page.tsx에 264줄 추가하여 이미지 적용 완료",
+          "gap_reason": "요청한 이미지가 메인 홈에 정확히 적용됨",
+          "interaction_id": 107,
+          "prompt_summary": " public에 있는 tmp/Process-oriented evaluation.png를 메인 홈의 과정중심 평가 이미지로 사용하면 어떨까?",
+          "interaction_type": "change"
+        },
+        {
+          "intent": " public/work-tree.png 도 메인 홈의 작업 그룹별 상세 분석 시각 이미지에",
+          "status": "CONTEXT",
+          "outcome": "\"이 이미지는 \\\"작업 그룹별 상세 분석\\\" 섹션에 적합합니다. 작업들이 그룹별로 분류되어 있고 카테고리(feature, docs, refactor, config)와 커밋 수가 표시되어 있어서 해당 기능을 잘 보여줍니다.\\n\\n적용할까요?\"",
+          "gap_reason": null,
+          "interaction_id": 109,
+          "prompt_summary": " public/work-tree.png 도 메인 홈의 작업 그룹별 상세 분석 시각 이미지에 적합한지 확인해줘",
+          "interaction_type": "context"
+        },
+        {
+          "intent": "이전 논의사항 적용",
+          "status": "SUCCESS",
+          "outcome": "app/page.tsx 7줄 추가/5줄 수정으로 work-tree.png 적용",
+          "gap_reason": "작업 그룹별 분석 섹션에 이미지 정확히 적용됨",
+          "interaction_id": 110,
+          "prompt_summary": " 적용해",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "메인 홈 섹션 순서 변경",
+          "status": "SUCCESS",
+          "outcome": "app/page.tsx 95줄 이동하여 섹션 순서 재배치 완료",
+          "gap_reason": "요청한 순서대로 섹션 배치가 정확��� 변경됨",
+          "interaction_id": 111,
+          "prompt_summary": " 메인 홈의 순서를 바꿀게 작업 그룹별 상세 분석을 2번째 부근에 넣고 AI 활용 패턴은 4번째로 넣자",
+          "interaction_type": "change"
+        },
+        {
+          "intent": " tmp/task-anlaysis.png를 세번째 슬롯 시각화 사진에 넣어줘",
+          "status": "CONTEXT",
+          "outcome": "\"`tmp/task-anlaysis.png` 파일이 존재하지 않습니다. tmp 디렉토리에 PNG 파일이 없는 상태입니다.\\n\\n이미지 파일의 정확한 경로를 확인해 주시거나, 해당 이미지를 `tmp/` 또는 `public/` 디렉토리에 추가해 주세요.\"",
+          "gap_reason": null,
+          "interaction_id": 139,
+          "prompt_summary": " tmp/task-anlaysis.png를 세번째 슬롯 시각화 사진에 넣어줘",
+          "interaction_type": "context"
+        },
+        {
+          "intent": "task-analysis 이미지 적용",
+          "status": "PARTIAL",
+          "outcome": "project-detail-content.tsx에 40줄 추가하여 모달 생성",
+          "gap_reason": "사용자가 원하는 위치와 다르게 구현됨",
+          "interaction_id": 140,
+          "prompt_summary": " task-analysis 야",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "코드 되돌리고 홈화면에 이미지 추가",
+          "status": "SUCCESS",
+          "outcome": "이전 변경사항 롤백 후 홈 화면 세번째 슬롯에 이미지 추가",
+          "gap_reason": "코드 롤백과 홈화면 적용이 정확히 수행됨",
+          "interaction_id": 141,
+          "prompt_summary": " 아니야 다시 코드 되돌리고 홈화면의 세번째 슬롯 시각화로 넣어줘",
+          "interaction_type": "change"
+        }
+      ],
+      "total_duration_minutes": 6
+    },
+    {
+      "persona": {
+        "bloom": "적용",
+        "persona": "기능 구현 전문가",
+        "core_skill": "비즈니스 로직 구현"
+      },
+      "task_id": "task_7",
+      "category": "feature",
+      "task_name": "작업 분석 리포트 기능",
+      "commit_count": 13,
+      "effort_score": 145.17,
+      "gap_analysis": {
+        "intent": "작업 분석 리포트 기능",
+        "status": "SUCCESS",
+        "outcome": "변경 6개 (성공 6), ���락 0개",
+        "gap_reason": "데모 데이터 기반 보고서 컴포넌트 완전히 구현됨; 요청한 필드명으로 정확히 수정됨; 배열 타입 검증 로직으로 에러 해결됨",
+        "success_rate": 100,
+        "type_breakdown": {
+          "change_count": 6,
+          "context_count": 0,
+          "status_counts": {
+            "FAIL": 0,
+            "CONTEXT": 0,
+            "PARTIAL": 0,
+            "SUCCESS": 6,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "2dbdaca",
+            "step": 1,
+            "message": "tmp/work_tree.json은 데모 데이터야. 공수가 가장 많은 상위 작업 3개의 데이터에 대해서 각 작업마다 작업 흐름과 관계, 효율성 점수 와 피드백을 적어놨어. 이에 대해서 적절한 보고서 양식으로 사용자 대시보드에 추가하고 싶어 어떻게 추가하면 좋을까?"
+          },
+          {
+            "hash": "90883d6",
+            "step": 2,
+            "message": "tmp/work_tree.json은 데모 데이터야. 공수가 가장 많은 상위 작업 3개의 데이터에 대해서 각 작업마다 작업 흐름과 관계, 효율성 점수 와 피드백을 적어놨어. 이에 대해서 적절한 보고서 양식으로 사용자 대시보드에 추가하고 싶어 어떻게 추가하면 좋을까?"
+          },
+          {
+            "hash": "1c24fd4",
+            "step": 3,
+            "message": "top_tasks_analysis으로 데이터가 tmp/work_tree.json 형식으로 들어올거야 수정해줘"
+          },
+          {
+            "hash": "0f9f3d8",
+            "step": 4,
+            "message": "top_tasks_analysis으로 데이터가 tmp/work_tree.json 형식으로 들어올거야 수정해줘"
+          },
+          {
+            "hash": "811e13c",
+            "step": 5,
+            "message": "Uncaught TypeError: a.map is not a function\n    at B (5dcf3eaf559724be.js:1:17151)\n    at av (d4bc28845560c217.js:1:63226)\n    at oX (d4bc28845560c217.js:1:83499)\n    at io (d4bc28845560c217.js:1:94931)\n    at sc (d4bc28845560c217.js:1:137952)\n    at d4bc28845560c217.js:1:137797\n    at ss (d4bc28845560c217.js:1:137805)\n    at u9 (d4bc28845560c217.js:1:133730)\n    at sV (d4bc28845560c217.js:1:159457)"
+          },
+          {
+            "hash": "7e4296a",
+            "step": 6,
+            "message": "Uncaught TypeError: a.map is not a function\n    at B (5dcf3eaf559724be.js:1:17151)\n    at av (d4bc28845560c217.js:1:63226)\n    at oX (d4bc28845560c217.js:1:83499)\n    at io (d4bc28845560c217.js:1:94931)\n    at sc (d4bc28845560c217.js:1:137952)\n    at d4bc28845560c217.js:1:137797\n    at ss (d4bc28845560c217.js:1:137805)\n    at u9 (d4bc28845560c217.js:1:133730)\n    at sV (d4bc28845560c217.js:1:159457)"
+          },
+          {
+            "hash": "7e4414a",
+            "step": 7,
+            "message": "\u0001작업요약이 메인이어야 할 것 같아. 사용자 의도 최종 결과, 실행 흐름 모두 강조됬으면 좋겠고, 특별히 실행흐름은 각각의 요소가 두드러지게 표현 될 수 있는 UI로 구성해줘 작업 분석 보고서에서 작업 흐름은 맨 아래에 표시하고 보고서이다 보니 전체적으로 밝은 느낌을 주면 좋겠어"
+          },
+          {
+            "hash": "a0f8943",
+            "step": 8,
+            "message": "\u0001작업요약이 메인이어야 할 것 같아. 사용자 의도 최종 결과, 실행 흐름 모두 강조됬으면 좋겠고, 특별히 실행흐름은 각각의 요소가 두드러지게 표현 될 수 있는 UI로 구성해줘 작업 분석 보고서에서 작업 흐름은 맨 아래에 표시하고 보고서이다 보니 전체적으로 밝은 느낌을 주면 좋겠어"
+          },
+          {
+            "hash": "8244999",
+            "step": 9,
+            "message": "상세 작업 흐름에서 사용자와 AI가 전부 같은 메시지를 띄고 있는데, 자연스럽게 두개를 하나로 합치고, AI가 다른 메시지와 가지는 관계를 적어 놓자. 상호 흐름 같은 경우에는 이전 UI로 되돌리고 작업 요약 및 개선 필요사항 상호작용별 분석 같은 경우에는 색깔만 통일성있게 바꿔주면 좋을 것 같아."
+          },
+          {
+            "hash": "2a5d945",
+            "step": 10,
+            "message": "상세 작업 흐름에서 사용자와 AI가 전부 같은 메시지를 띄고 있는데, 자연스럽게 두개를 하나로 합치고, AI가 다른 메시지와 가지는 관계를 적어 놓자. 상호 흐름 같은 경우에는 이전 UI로 되돌리고 작업 요약 및 개선 필요사항 상호작용별 분석 같은 경우에는 색깔만 통일성있게 바꿔주면 좋을 것 같아."
+          },
+          {
+            "hash": "e2ac15c",
+            "step": 11,
+            "message": "UI를 배경 밝게하라는 명령 상태로 되돌리자"
+          },
+          {
+            "hash": "1219f90",
+            "step": 12,
+            "message": "UI를 배경 밝게하라는 명령 이전 상태로 되돌리자"
+          },
+          {
+            "hash": "b5b3cb8",
+            "step": 13,
+            "message": "UI를 배경 밝게하라는 명령 이전 상태로 되돌리자"
+          }
+        ],
+        "user_intent": "작업 분석 데이터를 대시보드에 보고서 형태로 표시하는 기능 구현",
+        "final_outcome": "작업 분석 보고서 UI 완성, 일부 UI 변경사항 되돌림 처리",
+        "execution_flow": "초기 기획→데이터 구조 수정→JavaScript 에러 해결→UI 디자인 개선→메시지 통합 및 레이아웃 조정→되돌리기 작업",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "독립",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "수정",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "독립",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "의존",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "독립",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "수정",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "독립",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "확장",
+            "from_step": 8
+          },
+          {
+            "to_step": 10,
+            "relation": "독립",
+            "from_step": 9
+          },
+          {
+            "to_step": 11,
+            "relation": "수정",
+            "from_step": 10
+          },
+          {
+            "to_step": 12,
+            "relation": "수정",
+            "from_step": 11
+          },
+          {
+            "to_step": 13,
+            "relation": "독립",
+            "from_step": 12
+          }
+        ],
+        "improvement_feedback": {
+          "suggestions": [
+            "중복 커밋 방지를 위한 변경사항 검증",
+            "UI 변경 전 사전 기획 강화",
+            "에러 해결 후 테스트 단계 추가"
+          ],
+          "flow_assessment": "중복 커밋과 되돌리기가 많아 비효율적인 작업 흐름",
+          "is_flow_appropriate": false
+        }
+      },
+      "task_description": "공수가 많은 상위 작업 3��� 분석 및 작업 요약, 실행 흐름 표시 기능 구현",
+      "interaction_count": 6,
+      "total_lines_changed": 1760,
+      "interaction_analyses": [
+        {
+          "intent": "작업 데이터 보고서 양식 추가",
+          "status": "SUCCESS",
+          "outcome": "top-tasks-report.tsx 605줄, project-detail-content.tsx 363줄 추가",
+          "gap_reason": "데모 데이터 기반 보고서 컴포넌트 완전히 구현됨",
+          "interaction_id": 124,
+          "prompt_summary": " tmp/work_tree.json은 데모 데이터야. 공수가 가장 많은 상위 작업 3개의 데이터에 대해서 각 작업마다 작업 흐름과 관계, 효율성 점수 와 피드백을 적어놨어. 이에 ",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "데이터 필드명을 top_tasks_analysis로 수정",
+          "status": "SUCCESS",
+          "outcome": "top-tasks-report.tsx에서 데이터 필드명 변경 완료",
+          "gap_reason": "요청한 필드명으로 정확히 수정됨",
+          "interaction_id": 128,
+          "prompt_summary": " top_tasks_analysis으로 데이터가 tmp/work_tree.json 형식으로 들어올거야 수정해줘",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "map 함수 에러 해결",
+          "status": "SUCCESS",
+          "outcome": "top-tasks-report.tsx에 배열 방어코드 13줄 추가",
+          "gap_reason": "배열 타입 검증 로직으로 에러 해결됨",
+          "interaction_id": 129,
+          "prompt_summary": " Uncaught TypeError: a.map is not a function\n    at B (5dcf3eaf559724be.js:1:17151)\n    at av (d4bc2",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "작업요약 중심으로 UI 개선",
+          "status": "SUCCESS",
+          "outcome": "top-tasks-report.tsx 223줄 추가/242줄 수정으로 UI 재구성",
+          "gap_reason": "작업요약 강조와 밝은 보고서 스타일로 완전 개선됨",
+          "interaction_id": 136,
+          "prompt_summary": " \u0001작업요약이 메인이어야 할 것 같아. 사용자 의도 최종 결과, 실행 흐름 모두 강조됬으면 좋겠고, 특별히 실행흐름은 각각의 요소가 두드러지게 표현 될 수 있는 UI로 구성해줘 작",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "상세 흐름 UI 개선 및 색상 통일",
+          "status": "SUCCESS",
+          "outcome": "top-tasks-report.tsx 107줄 추가/91줄 수정으로 UI 개선",
+          "gap_reason": "사용자/AI 메시지 통합과 색상 통일 완료됨",
+          "interaction_id": 137,
+          "prompt_summary": " 상세 작업 흐름에서 사용자와 AI가 전부 같은 메시지를 띄고 있는데, 자연스럽게 두개를 하나로 합치고, AI가 다른 메시지와 가지는 관계를 적어 놓자. 상호 흐름 같은 경우에는 ",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "UI를 이전 다크 테마로 되돌리기",
+          "status": "SUCCESS",
+          "outcome": "top-tasks-report.tsx 파일에서 54줄 변경으로 다크 테마 복원",
+          "gap_reason": "요청한 이전 상태 복원이 정확히 수행됨",
+          "interaction_id": 138,
+          "prompt_summary": " UI를 배경 밝게하라는 명령 이전 상태로 되돌리자",
+          "interaction_type": "change"
+        }
+      ],
+      "total_duration_minutes": 25.72
+    },
+    {
+      "persona": {
+        "bloom": "적용",
+        "persona": "기능 구현 전문가",
+        "core_skill": "비즈니스 로직 구현"
+      },
+      "task_id": "task_1",
+      "category": "feature",
+      "task_name": "관리자 대시보드 상호작용 개선",
+      "commit_count": 7,
+      "effort_score": 72.08,
+      "gap_analysis": {
+        "intent": "관리자 대시보드 상호작용 개선",
+        "status": "SUCCESS",
+        "outcome": "변경 3개 (성공 3), 맥락 0개",
+        "gap_reason": "대화 내역 표시 기능이 완전히 구현됨; 마크다운 렌더링 기능이 정확히 추가됨; 줄바꿈 문자열 변환이 정확히 구현됨",
+        "success_rate": 100,
+        "type_breakdown": {
+          "change_count": 3,
+          "context_count": 0,
+          "status_counts": {
+            "FAIL": 0,
+            "CONTEXT": 0,
+            "PARTIAL": 0,
+            "SUCCESS": 3,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "ee5d2ec",
+            "step": 1,
+            "message": "현재 관리자 대시보드 창에서 AI 상호작용에서 유저 프롬프트만 보이는데, ai_interactions의 session_id, conversation_start_id, end_id 를 참고로 해서 사용자와 AI assistant가 상호작용한 대화를 보여주도록 하자 메시지가 많아서 일정크기 이상 벗어나면은 고정크기에 스크롤로 처리해"
+          },
+          {
+            "hash": "1a277ce",
+            "step": 2,
+            "message": "현재 관리자 대시보드 창에서 AI 상호작용에서 유저 프롬프트만 보이는데, ai_interactions의 session_id, conversation_start_id,       \n                                                                                                                                   \n  end_id 를 참고로 해서 사용자와 AI assistant가 상호작용한 대화를 보여주도록 하자 메시지가 많아서 일정크기 이상 벗어나면은         \n                                                                                                                                   \n  고정크기에 스크롤로 처리해"
+          },
+          {
+            "hash": "f0dbe05",
+            "step": 3,
+            "message": "현재 관리자 대시보드 창에서 AI 상호작용에서 유저 프롬프트만 보이는데, ai_interactions의 session_id, conversation_start_id,       \n                                                                                                                                   \n  end_id 를 참고로 해서 사용자와 AI assistant가 상호작용한 대화를 보여주도록 하자 메시지가 많아서 일정크기 이상 벗어나면은         \n                                                                                                                                   \n  고정크기에 스크롤로 처리해"
+          },
+          {
+            "hash": "d12f7c9",
+            "step": 4,
+            "message": "관리자 대시보드에 있는 각 사용자 대화 메시지 안의 내용이 마크다운 형식으로 되었는데 보기 좋게 출력하게 수정해줘"
+          },
+          {
+            "hash": "b3fd839",
+            "step": 5,
+            "message": "관리자 대시보드에 있는 각 사용자 대화 메시지 안의 내용이 마크다운 형식으로 되었는데 보기 좋게 출력하게 수정해줘"
+          },
+          {
+            "hash": "3211ed7",
+            "step": 6,
+            "message": "\\n 처리도 해줄 수 있어?"
+          },
+          {
+            "hash": "bbafe39",
+            "step": 7,
+            "message": "\\n 처리도 해줄 수 있어?"
+          }
+        ],
+        "user_intent": "관리자 대시보드에서 AI 상호작용 전체 대화를 보기 좋게 표시하고 싶었음",
+        "final_outcome": "AI 상호작용 대화가 마크다운 렌더링과 개행 처리로 보기 좋게 표시됨",
+        "execution_flow": "대화 전체 표시 구현(3번 반복) → 마크다운 렌더링 추가(2번 반복) → 개행 문자 처리(2번 반복)로 단계별 진행",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "수정",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "수정",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "확장",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "수정",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "확장",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "수정",
+            "from_step": 6
+          }
+        ],
+        "improvement_feedback": {
+          "suggestions": [
+            "각 커밋마다 구체적이고 명확한 메시지 작성",
+            "동일 작업 반복 최소화로 커밋 수 줄이기"
+          ],
+          "flow_assessment": "동일한 작업을 여러 번 반복하여 비효율적이고 커밋 메시지가 불명확함",
+          "is_flow_appropriate": false
+        }
+      },
+      "task_description": "AI 상호작용에서 유저 프롬프트와 AI 응답을 구분하여 표시하고 메시지 내용 렌더링 개선",
+      "interaction_count": 3,
+      "total_lines_changed": 593,
+      "interaction_analyses": [
+        {
+          "intent": "AI 상호작용 대화 내역 표시",
+          "status": "SUCCESS",
+          "outcome": "대화 표시 컴포넌트, API 클라이언트, 타입 정의 구현",
+          "gap_reason": "대화 내역 표시 기능이 완전히 구현됨",
+          "interaction_id": 96,
+          "prompt_summary": " 현재 관리자 대시보드 창에서 AI 상호작용에서 유저 프롬프트만 보이는데, ai_interactions의 session_id, conversation_start_id,       ",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "마크다운 형식 메시지 보기좋게 출력",
+          "status": "SUCCESS",
+          "outcome": "interaction-list-view.tsx에서 7줄 추가로 마크다운 렌더링",
+          "gap_reason": "마크다운 렌더링 기능이 정확히 추가됨",
+          "interaction_id": 105,
+          "prompt_summary": " 관리자 대시보드에 있는 각 사용자 대화 메시지 안의 내용이 마크다운 형식으로 되었는데 보기 좋게 출력하게 수정해줘",
+          "interaction_type": "change"
+        },
+        {
+          "intent": "\\n 문자열을 실제 줄바꿈으로 처리",
+          "status": "SUCCESS",
+          "outcome": "interaction-list-view.tsx에서 1줄 수정으로 줄바꿈 처리",
+          "gap_reason": "줄바꿈 문자열 변환이 정확히 구현됨",
+          "interaction_id": 106,
+          "prompt_summary": " \\n 처리도 해줄 수 있어?",
+          "interaction_type": "change"
+        }
+      ],
+      "total_duration_minutes": 11.45
+    }
+  ],
+  "analyzed_at": "2025-12-19T15:28:51.876447"
+}

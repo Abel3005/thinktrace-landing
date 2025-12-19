@@ -1,0 +1,572 @@
+{
+  "cache": {
+    "task_hashes": {
+      "task_2": "0075a6f51a5d0303",
+      "task_6": "446fef48cba40bde",
+      "task_18": "79e60bc50efafe4b"
+    },
+    "gap_analyses": {
+      "142": {
+        "intent": "이전 작업 계속 진행",
+        "status": "SUCCESS",
+        "outcome": "work_tree_analyzer.py와 tasks.py 파일이 대폭 수정됨",
+        "gap_reason": null,
+        "interaction_type": "change"
+      }
+    }
+  },
+  "stats": {
+    "new_analyses": 1,
+    "cached_analyses": 0,
+    "total_interactions": 13,
+    "total_change_interactions": 1
+  },
+  "top_tasks": [
+    {
+      "persona": {
+        "bloom": "이해",
+        "persona": "지식 번역가",
+        "core_skill": "주석/문서화"
+      },
+      "task_id": "task_2",
+      "category": "docs",
+      "task_name": "프로젝트 기획 검토",
+      "commit_count": 10,
+      "effort_score": 100.38,
+      "gap_analysis": {
+        "intent": "프로젝트 기획 검토",
+        "status": "CONTEXT_ONLY",
+        "outcome": "변경 0개 (성공 0), 맥락 5개",
+        "gap_reason": null,
+        "success_rate": null,
+        "type_breakdown": {
+          "change_count": 0,
+          "context_count": 5,
+          "status_counts": {
+            "FAIL": 0,
+            "CONTEXT": 5,
+            "PARTIAL": 0,
+            "SUCCESS": 0,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "41eaa0d",
+            "step": 1,
+            "actor": "user",
+            "message": "tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐"
+          },
+          {
+            "hash": "e8f6911",
+            "step": 2,
+            "actor": "ai",
+            "message": "tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐"
+          },
+          {
+            "hash": "c4f32f2",
+            "step": 3,
+            "actor": "user",
+            "message": "현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일 변경상황을 저장하기 위한 일종의 스냅샷에 가까워 커밋메시지도 실제 메시지가 아닌 사용자가 "
+          },
+          {
+            "hash": "05619b1",
+            "step": 4,
+            "actor": "ai",
+            "message": "현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일 변경상황을 저장하기 위한 일종의 스냅샷에 가까워 커밋메시지도 실제 메시지가 아닌 사용자가 "
+          },
+          {
+            "hash": "36e3cce",
+            "step": 5,
+            "actor": "user",
+            "message": "아니야 전체 작업은 사용자가 수정한 내역도 포함해야지"
+          },
+          {
+            "hash": "808e0a8",
+            "step": 6,
+            "actor": "ai",
+            "message": "아니야 전체 작업은 사용자가 수정한 내역도 포함해야지"
+          },
+          {
+            "hash": "7c8b901",
+            "step": 7,
+            "actor": "user",
+            "message": "지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한 것이든 MECE하게 구성되야해"
+          },
+          {
+            "hash": "2d5b280",
+            "step": 8,
+            "actor": "ai",
+            "message": "지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한 것이든 MECE하게 구성되야해"
+          },
+          {
+            "hash": "3700ea6",
+            "step": 9,
+            "actor": "user",
+            "message": "맞아 A 방식으로 가야할 것 같아."
+          },
+          {
+            "hash": "a4f4887",
+            "step": 10,
+            "actor": "ai",
+            "message": "맞아 A 방식으로 가야할 것 같아."
+          }
+        ],
+        "user_intent": "프로젝트 기획서와 실제 구현 로직 간의 일치성을 검토하고 작업 방식을 정립",
+        "final_outcome": "A 방식 채택으로 사용자-AI 협업 작업을 MECE하게 구성하기로 결정",
+        "execution_flow": "기획-구현 대조검토 → 프로젝트 개념 재정의 → 작업범위 확장논의 → MECE원칙 적용검토 → 최종방향 합의",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "의존",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "의존",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "수정",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "의존",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "확장",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "의존",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "수정",
+            "from_step": 8
+          },
+          {
+            "to_step": 10,
+            "relation": "의존",
+            "from_step": 9
+          }
+        ]
+      },
+      "task_description": "plan.md 기획사항과 work-tree 로직 비교 검토",
+      "interaction_count": 5,
+      "total_lines_changed": 0,
+      "interaction_analyses": [
+        {
+          "intent": " tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐",
+          "status": "CONTEXT",
+          "outcome": "AI 응답",
+          "gap_reason": null,
+          "interaction_id": 86,
+          "prompt_summary": " tmp/plan.md 의 기획 사항이 work-tree 로직에 모두 반영되었는지 점검해봐",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " 현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일",
+          "status": "CONTEXT",
+          "outcome": "AI 응답",
+          "gap_reason": null,
+          "interaction_id": 87,
+          "prompt_summary": " 현재 프로젝트에 대해서 다시금 짚어주고 싶은데, 여기서 커밋은 git의 커밋이 아닌 파일 변경상황을 저장하기 위한 일종의 스냅샷에 가까워 커밋메시지도 실제 메시지가 아닌 사용자가",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " 아니야 전체 작업은 사용자가 수정한 내역도 포함해야지",
+          "status": "CONTEXT",
+          "outcome": "AI 응답",
+          "gap_reason": null,
+          "interaction_id": 88,
+          "prompt_summary": " 아니야 전체 작업은 사용자가 수정한 내역도 포함해야지",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " 지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한",
+          "status": "CONTEXT",
+          "outcome": "AI 응답",
+          "gap_reason": null,
+          "interaction_id": 89,
+          "prompt_summary": " 지금 내용과 기획된 내용을 다시 한번 대조해봐 전체 작업은 사용자가 한 것이든 AI가 한 것이든 MECE하게 구성되야해",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " 맞아 A 방식으로 가야할 것 같아.",
+          "status": "CONTEXT",
+          "outcome": "AI 응답",
+          "gap_reason": null,
+          "interaction_id": 90,
+          "prompt_summary": " 맞아 A 방식으로 가야할 것 같아.",
+          "interaction_type": "context"
+        }
+      ],
+      "total_duration_minutes": 3.75
+    },
+    {
+      "persona": {
+        "bloom": "분석",
+        "persona": "엣지 케이스 탐험가",
+        "core_skill": "예외/테스트 설계"
+      },
+      "task_id": "task_6",
+      "category": "test",
+      "task_name": "데이터 저장 검증",
+      "commit_count": 9,
+      "effort_score": 85.44,
+      "gap_analysis": {
+        "intent": "데이터 저장 검증",
+        "status": "CONTEXT_ONLY",
+        "outcome": "변경 0개 (성공 0), 맥락 4개",
+        "gap_reason": null,
+        "success_rate": null,
+        "type_breakdown": {
+          "change_count": 0,
+          "context_count": 4,
+          "status_counts": {
+            "FAIL": 0,
+            "CONTEXT": 4,
+            "PARTIAL": 0,
+            "SUCCESS": 0,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "a3b8f1d",
+            "step": 1,
+            "actor": "user",
+            "message": "\\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 비"
+          },
+          {
+            "hash": "64d80ef",
+            "step": 2,
+            "actor": "ai",
+            "message": "\\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 비"
+          },
+          {
+            "hash": "d48fc8c",
+            "step": 3,
+            "actor": "user",
+            "message": "맨 마지막 데이터들을 확인해 보면 이렇게 저장되어 있어"
+          },
+          {
+            "hash": "c4eeac8",
+            "step": 4,
+            "actor": "user",
+            "message": "지금은file_contents의 content 말하는 거야"
+          },
+          {
+            "hash": "877a8c5",
+            "step": 5,
+            "actor": "ai",
+            "message": "지금은file_contents의 content 말하는 거야"
+          },
+          {
+            "hash": "4ef2e41",
+            "step": 6,
+            "actor": "user",
+            "message": "/api/interactions POST 함수 비교할 때야"
+          },
+          {
+            "hash": "a676d95",
+            "step": 7,
+            "actor": "ai",
+            "message": "/api/interactions POST 함수 비교할 때야"
+          },
+          {
+            "hash": "92b50ce",
+            "step": 8,
+            "actor": "user",
+            "message": "마지막 데이터를 가져와 봐"
+          },
+          {
+            "hash": "ec2c34e",
+            "step": 9,
+            "actor": "ai",
+            "message": "마지막 데이터를 가져와 봐"
+          }
+        ],
+        "user_intent": "file_contents의 content 데이터가 올바르게 저장되고 비교되는지 검증",
+        "final_outcome": "데이터 저장 상태 확인을 위한 마지막 데이터 조회 단계까지 진행",
+        "execution_flow": "압축된 데이터 비교 문제 발견 → file_contents.content 범위 명확화 → /api/interactions POST 함수 비교 맥락 설정 → 마지막 데이터 조회 요청",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "의존",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "수정",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "의존",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "확장",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "의존",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "확장",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "의존",
+            "from_step": 8
+          }
+        ]
+      },
+      "task_description": "file_contents 저장 및 압축 데이터 검증",
+      "interaction_count": 4,
+      "total_lines_changed": 0,
+      "interaction_analyses": [
+        {
+          "intent": " \\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874",
+          "status": "CONTEXT",
+          "outcome": "\"`\\\\x789c`는 zlib 압축 시그니처입니다. `entry_data`가 압축된 상태로 저장되어 있는 것 같습니다. 실제 데이터를 확인해보겠습니다.\"",
+          "gap_reason": null,
+          "interaction_id": 100,
+          "prompt_summary": " \\x789c85575d4f5bd9157df7afd87232e29a3124e4e385874a409a140954149 기존의 데이터와 비교할 때 앞에와 같은 데이터가 나와서 제대로 ",
+          "interaction_type": "context"
+        },
+        {
+          "intent": "  지금은file_contents의 content 말하는 거야",
+          "status": "CONTEXT",
+          "outcome": "\"`file_contents.content`는 zlib으로 압축된 바이너리입니다. 비교 시 압축 해제가 필요합니다.\\n\\n어디서 비교하고 있나요? (어떤 파일/함수에서 문제가 발생하는지 알려주시면 확인하겠습니다)\"",
+          "gap_reason": null,
+          "interaction_id": 101,
+          "prompt_summary": "  지금은file_contents의 content 말하는 거야",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " /api/interactions POST 함수 비교할 때야",
+          "status": "CONTEXT",
+          "outcome": "\"<thinking>\\n`get_previous_file_content` 함수를 찾아봐야 합니다. 이 함수가 이전 파일 내용을 가져올 때 압축 해제를 하는지 확인해야 합니다.\\n</thinking>\\n\\n`get_previous_file_content` 함수를 확인하겠습니다.\"",
+          "gap_reason": null,
+          "interaction_id": 102,
+          "prompt_summary": " /api/interactions POST 함수 비교할 때야",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " 마지막 데이터를 가져와 봐",
+          "status": "CONTEXT",
+          "outcome": "\"문제를 찾았습니다. `content`가 `text` 타입으로 저장되어 있고, 바이너리가 escape된 hex 문자열(`\\\\x789c...`)로 되어 있습니다.\\n\\n`get_previous_file_content`에서 이 형식을 처리하도록 수정해야 합니다.\"",
+          "gap_reason": null,
+          "interaction_id": 103,
+          "prompt_summary": " 마지막 데이터를 가져와 봐",
+          "interaction_type": "context"
+        }
+      ],
+      "total_duration_minutes": 4.38
+    },
+    {
+      "persona": {
+        "bloom": "적용",
+        "persona": "기능 구현 전문가",
+        "core_skill": "비즈니스 로직 구현"
+      },
+      "task_id": "task_18",
+      "category": "feature",
+      "task_name": "AI 상호작용 분석 로직 개발",
+      "commit_count": 9,
+      "effort_score": 86.66,
+      "gap_analysis": {
+        "intent": "AI 상호작용 분석 로직 개발",
+        "status": "SUCCESS",
+        "outcome": "변경 1개 (성공 1), 맥락 3개",
+        "gap_reason": null,
+        "success_rate": 100,
+        "type_breakdown": {
+          "change_count": 1,
+          "context_count": 3,
+          "status_counts": {
+            "FAIL": 0,
+            "CONTEXT": 3,
+            "PARTIAL": 0,
+            "SUCCESS": 1,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "thought_process": {
+        "commit_flow": [
+          {
+            "hash": "b4cd9de",
+            "step": 1,
+            "actor": "user",
+            "message": "알겠어. 기존 로직 중에서 결과를 파일 변경으로만 추산하는데, 유저와 AI와 대화한 내역을 conversations에서 가져올 수 있어. 그 정보도 함께 \"결과\"로 사용하면 어떨 "
+          },
+          {
+            "hash": "ed3f051",
+            "step": 2,
+            "actor": "ai",
+            "message": "알겠어. 기존 로직 중에서 결과를 파일 변경으로만 추산하는데, 유저와 AI와 대화한 내역을 conversations에서 가져올 수 있어. 그 정보도 함께 \"결과\"로 사용하면 어떨 "
+          },
+          {
+            "hash": "42b0774",
+            "step": 3,
+            "actor": "user",
+            "message": "AI INTERACTION에서 claude_session_id도 같아야 해. 그리고 파일 변경 내역은 확실한 결과고 AI 응답은 보조적인 수단이라는 것에 대해서 강력한 장치가 있으"
+          },
+          {
+            "hash": "838eab4",
+            "step": 4,
+            "actor": "ai",
+            "message": "AI INTERACTION에서 claude_session_id도 같아야 해. 그리고 파일 변경 내역은 확실한 결과고 AI 응답은 보조적인 수단이라는 것에 대해서 강력한 장치가 있으"
+          },
+          {
+            "hash": "6a6d213",
+            "step": 5,
+            "actor": "user",
+            "message": "조건으로 분류한 것은 좋아. 이것을 통해서 변경작업에 해당하는 것과 맥락에 해당하는 것으로 구분할 수 있을 것 같아. 그런데 이렇게 바꿨을 경우 시스템이 많이 바뀌나?"
+          },
+          {
+            "hash": "ee93551",
+            "step": 6,
+            "actor": "ai",
+            "message": "조건으로 분류한 것은 좋아. 이것을 통해서 변경작업에 해당하는 것과 맥락에 해당하는 것으로 구분할 수 있을 것 같아. 그런데 이렇게 바꿨을 경우 시스템이 많이 바뀌나?"
+          },
+          {
+            "hash": "1dbe91b",
+            "step": 7,
+            "actor": "user",
+            "message": "좋아 결과로서 AI 응답을 포함시키는데  맥락으로 판단된 것은 사용자 프롬프트에 AI 응답만 있는 경우야. 실제 변경 작업에 해당하는 AI 응답들이 맥락을 보조수단 삼아, 전체 워"
+          },
+          {
+            "hash": "8f4c638",
+            "step": 8,
+            "actor": "user",
+            "message": "continue"
+          },
+          {
+            "hash": "2ccda7f",
+            "step": 9,
+            "actor": "ai",
+            "message": "continue"
+          }
+        ],
+        "user_intent": "파일 변경뿐만 아니라 AI 대화 내역도 결과로 활용하는 분석 시스템 구축",
+        "final_outcome": "파일변경을 주결과로 하고 AI응답을 맥락 보조수단으로 활용하는 체계 완성",
+        "execution_flow": "기존 파일변경 중심 로직에서 AI 상호작용 추가 제안 → 세션ID 조건과 우선순위 설정 → 변경작업/맥락 분류 체계 도입 → 시스템 영향도 검토 → 맥락 활용 방안 구체화",
+        "commit_relations": [
+          {
+            "to_step": 2,
+            "relation": "독립",
+            "from_step": 1
+          },
+          {
+            "to_step": 3,
+            "relation": "확장",
+            "from_step": 2
+          },
+          {
+            "to_step": 4,
+            "relation": "독립",
+            "from_step": 3
+          },
+          {
+            "to_step": 5,
+            "relation": "확장",
+            "from_step": 4
+          },
+          {
+            "to_step": 6,
+            "relation": "독립",
+            "from_step": 5
+          },
+          {
+            "to_step": 7,
+            "relation": "확장",
+            "from_step": 6
+          },
+          {
+            "to_step": 8,
+            "relation": "확장",
+            "from_step": 7
+          },
+          {
+            "to_step": 9,
+            "relation": "독립",
+            "from_step": 8
+          }
+        ]
+      },
+      "task_description": "사용자와 AI 대화 내용을 분석하여 작업 맥락을 파악하는 로직 구현",
+      "interaction_count": 4,
+      "total_lines_changed": 106,
+      "interaction_analyses": [
+        {
+          "intent": "  알겠어. 기존 로직 중에서 결과를 파일 변경으로만 추산하는데, 유저와 AI와 대화한 내",
+          "status": "CONTEXT",
+          "outcome": "\"좋은 아이디어입니다. 현재는 \\\"결과\\\"를 파일 변경만으로 판단하는데, 대화 내역을 포함하면 더 정확한 Gap Analysis가 가능합니다.\\n\\n**현재 vs 제안:**\\n\\n| 항목 | 현재 | 제안 |\\n|------|------|------|\\n| **Intent** | prompt_text | prompt_text |\\n| **Outcome** | 파일 변경만 | 파일 변경 + 대화 내역 |\\n\\n**대화 내역 활용 시 장점:**\\n\\n1. **설명형 작업 캡처**: 파일 변경 없이 설명만 한 경우도 \\\"결과\\\"로 인식\\",
+          "gap_reason": null,
+          "interaction_id": 132,
+          "prompt_summary": "  알겠어. 기존 로직 중에서 결과를 파일 변경으로만 추산하는데, 유저와 AI와 대화한 내역을 conversations에서 가져올 수 있어. 그 정보도 함께 \"결과\"로 사용하면 어",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " AI INTERACTION에서 claude_session_id도 같아야 해. 그리고 파일",
+          "status": "CONTEXT",
+          "outcome": "\"명확한 요구사항입니다. 정리하면:\\n\\n**1. Conversation 조회 조건:**\\n```\\nWHERE session_id = AIInteraction.claude_session_id\\n  AND id BETWEEN conversation_start_id AND conversation_end_id\\n```\\n\\n**2. 결과 우선순위 구조:**\\n\\n```json\\n{\\n  \\\"outcome\\\": {\\n    \\\"definitive\\\": {\\n      \\\"file_changes\\\": [...],\\n      \\\"total_",
+          "gap_reason": null,
+          "interaction_id": 133,
+          "prompt_summary": " AI INTERACTION에서 claude_session_id도 같아야 해. 그리고 파일 변경 내역은 확실한 결과고 AI 응답은 보조적인 수단이라는 것에 대해서 강력한 장치가 있",
+          "interaction_type": "context"
+        },
+        {
+          "intent": " 조건으로 분류한 것은 좋아. 이것을 통해서 변경작업에 해당하는 것과 맥락에 해당하는 것으",
+          "status": "CONTEXT",
+          "outcome": "\"크게 바뀌지 않습니다. 변경 범위를 정리하면:\\n\\n**변경 필요:**\\n\\n| 파일 | 함수 | 변경 내용 |\\n|------|------|----------|\\n| `tasks.py` | `_fetch_interactions_for_analysis()` | Conversation 조회 추가 |\\n| `work_tree_analyzer.py` | `_perform_batch_gap_analysis()` | 프롬프트에 AI 응답 포함 |\\n\\n**변경 불필요:**\\n\\n| 항목 | 이유 |\\n|------|------|\\n| DB",
+          "gap_reason": null,
+          "interaction_id": 134,
+          "prompt_summary": " 조건으로 분류한 것은 좋아. 이것을 통해서 변경작업에 해당하는 것과 맥락에 해당하는 것으로 구분할 수 있을 것 같아. 그런데 이렇게 바꿨을 경우 시스템이 많이 바뀌나? ",
+          "interaction_type": "context"
+        },
+        {
+          "intent": "이전 작업 계속 진행",
+          "status": "SUCCESS",
+          "outcome": "work_tree_analyzer.py와 tasks.py 파일이 대폭 수정됨",
+          "gap_reason": null,
+          "interaction_id": 142,
+          "prompt_summary": " continue",
+          "interaction_type": "change"
+        }
+      ],
+      "total_duration_minutes": 5.95
+    }
+  ],
+  "analyzed_at": "2025-12-19T14:17:33.317280"
+}

@@ -1,5 +1,6 @@
 import { getSupabaseServerClient, getSupabaseAdminClient } from "@/lib/supabase/server"
 import { fetchAllUserStatistics } from "@/lib/api/client"
+import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -36,14 +37,26 @@ interface UserWithStats extends User {
 export default async function AdminDashboardPage() {
   // 현재 로그인한 admin 사용자의 API 키 조회
   const supabase = await getSupabaseServerClient()
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser()
+
+  let authUser = null
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) throw error
+    authUser = user
+  } catch (error) {
+    // Refresh token 만료 또는 유효하지 않은 세션
+    console.error('Auth error:', error)
+    redirect("/login")
+  }
+
+  if (!authUser) {
+    redirect("/login")
+  }
 
   const { data: currentUser } = await supabase
     .from("users")
     .select("api_key")
-    .eq("id", authUser!.id)
+    .eq("id", authUser.id)
     .single()
 
   const adminApiKey = currentUser?.api_key

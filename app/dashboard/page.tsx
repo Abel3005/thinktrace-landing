@@ -9,9 +9,17 @@ import { fetchUserStatistics } from "@/lib/api/client"
 
 export default async function DashboardPage() {
   const supabase = await getSupabaseServerClient()
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser()
+
+  let authUser = null
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) throw error
+    authUser = user
+  } catch (error) {
+    // Refresh token 만료 또는 유효하지 않은 세션
+    console.error('Auth error:', error)
+    redirect("/login")
+  }
 
   if (!authUser) {
     redirect("/login")

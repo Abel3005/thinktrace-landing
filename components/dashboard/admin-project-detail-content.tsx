@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, GitBranch, Play, History } from "lucide-react"
+import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, GitBranch, Play, History, CheckCircle2, AlertCircle, Timer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow, format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -12,8 +12,15 @@ import { InteractionListView } from './interaction-list-view'
 interface WorkTreeHistoryItem {
   id: number;
   repo_id: number;
+  repo_name: string;
+  total_commits: number;
+  commit_limit: number;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   work_tree: any;
+  error_message: string | null;
   created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
 }
 
 interface AdminProjectDetailContentProps {

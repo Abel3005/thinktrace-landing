@@ -153,14 +153,32 @@ export async function createProject(
   apiKey?: string
 ): Promise<{ project: ProjectInfo; hash: string } | null> {
   try {
-    return await apiRequest<{ project: ProjectInfo; hash: string }>(
-      '/api/projects',
-      {
-        method: 'POST',
-        body: { userId, name, description },
-        apiKey,
-      }
-    );
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (apiKey) {
+      headers['X-API-Key'] = apiKey;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/projects`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ userId, name, description }),
+      cache: 'no-store',
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || 'Failed to create project');
+    }
+
+    // API returns { success, project, hash } directly (no data wrapper)
+    return {
+      project: result.project,
+      hash: result.hash,
+    };
   } catch (error) {
     console.error('Failed to create project:', error);
     return null;

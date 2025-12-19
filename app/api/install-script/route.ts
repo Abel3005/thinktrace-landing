@@ -99,40 +99,34 @@ Write-Host "check" -ForegroundColor Cyan
 # Create temporary file
 $TmpZip = [System.IO.Path]::GetTempFileName() + ".zip"
 Write-Host "check" -ForegroundColor Cyan
-try {
-    # Download using curl
-    Write-Host "Downloading files..." -ForegroundColor Cyan
-    $url = "${baseUrl}/api/download-codetracker?projectHash=${projectHash}&platform=windows-amd64"
-    curl.exe -fsSL -H "X-API-Key: ${apiKey}" $url -o $TmpZip
+# Download using curl
+Write-Host "Downloading files..." -ForegroundColor Cyan
+$url = "${baseUrl}/api/download-codetracker?projectHash=${projectHash}&platform=windows-amd64"
+curl.exe -fsSL -H "X-API-Key: ${apiKey}" $url -o $TmpZip
     
-    if (-not (Test-Path $TmpZip) -or (Get-Item $TmpZip).Length -eq 0) {
-        throw "Download failed"
-    }
+if (-not (Test-Path $TmpZip) -or (Get-Item $TmpZip).Length -eq 0) {
+    throw "Download failed"
+}
 
-    # Extract archive
-    Write-Host "Extracting files..." -ForegroundColor Cyan
-    Expand-Archive -Path $TmpZip -DestinationPath . -Force
+# Extract archive
+Write-Host "Extracting files..." -ForegroundColor Cyan
+Expand-Archive -Path $TmpZip -DestinationPath . -Force
 
-    Write-Host ""
-    Write-Host "CodeTracker installation complete!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Installed files:" -ForegroundColor Cyan
-    Write-Host "   .codetracker\\config.json"
-    Write-Host "   .codetracker\\credentials.json"
-    Write-Host "   .claude\\settings.json"
-    Write-Host "   .claude\\hooks\\user_prompt_submit.exe"
-    Write-Host "   .claude\\hooks\\stop.exe"
-    Write-Host ""
-    Write-Host "CodeTracker will be activated automatically when you run Claude Code." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "CodeTracker installation complete!" -ForegroundColor Green
+Write-Host ""
+Write-Host "Installed files:" -ForegroundColor Cyan
+Write-Host "   .codetracker\\config.json"
+Write-Host "   .codetracker\\credentials.json"
+Write-Host "   .claude\\settings.json"
+Write-Host "   .claude\\hooks\\user_prompt_submit.exe"
+Write-Host "   .claude\\hooks\\stop.exe"
+Write-Host ""
+Write-Host "CodeTracker will be activated automatically when you run Claude Code." -ForegroundColor Yellow
 
-} catch {
-    Write-Host "Installation failed: \$_" -ForegroundColor Red
-    exit 1
-} finally {
-    # Cleanup
-    if (Test-Path $TmpZip) {
-        Remove-Item $TmpZip -Force
-    }
+if (Test-Path $TmpZip) {
+    Remove-Item $TmpZip -Force
+  }
 }
 `;
 }

@@ -3,8 +3,9 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Terminal, Shield, CheckCircle2, AlertTriangle, Copy, Check, Settings, Trash2, Apple, Monitor } from "lucide-react"
+import { ArrowLeft, Terminal, Shield, CheckCircle2, AlertTriangle, Copy, Check, Settings, Trash2, Apple, Monitor, Download } from "lucide-react"
 import { useState } from "react"
+import { DownloadModal } from "@/components/dashboard/download-modal"
 
 function CodeBlock({ children, language = "bash" }: { children: string; language?: string }) {
   const [copied, setCopied] = useState(false)
@@ -51,6 +52,8 @@ function StepCard({ step, title, icon: Icon, children }: { step: number; title: 
 }
 
 export function GuideContent() {
+  const [showDemoModal, setShowDemoModal] = useState(false)
+
   return (
     <>
       <main className="flex-1">
@@ -84,42 +87,64 @@ export function GuideContent() {
               </ol>
             </StepCard>
 
-            <StepCard step={2} title="운영체제 선택 및 명령어 복사" icon={Terminal}>
-              <p className="text-muted-foreground mb-4">환경 설정 모달에서 운영체제를 선택하세요:</p>
+            <StepCard step={2} title="환경 설정 모달에서 명령어 복사" icon={Terminal}>
+              <p className="text-muted-foreground mb-4">
+                대시보드에서 <strong>환경 설정</strong> 버튼을 클릭하면 아래와 같은 모달이 나타납니다.
+              </p>
 
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border/50 bg-muted/30">
-                  <Apple className="h-4 w-4" />
-                  <span className="text-sm font-medium">Mac</span>
-                </div>
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border/50 bg-muted/30">
-                  <Monitor className="h-4 w-4" />
-                  <span className="text-sm font-medium">Windows</span>
-                </div>
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border/50 bg-muted/30">
-                  <Terminal className="h-4 w-4" />
-                  <span className="text-sm font-medium">Linux</span>
+              {/* Demo Modal Button */}
+              <div className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl mb-6">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <Download className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">환경 설정 모달 미리보기</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      버튼을 클릭하여 실제 모달 화면을 확인해보세요.
+                    </p>
+                  </div>
+                  <Button onClick={() => setShowDemoModal(true)} className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    환경 설정 모달 열기
+                  </Button>
                 </div>
               </div>
 
-              <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                <p className="text-sm text-primary font-medium mb-1">자동 아키텍처 감지</p>
-                <p className="text-sm text-muted-foreground">
-                  Intel/AMD(x64) 또는 ARM64(Apple Silicon 등)는 설치 스크립트가 자동으로 감지합니다.
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>운영체제 선택 (Mac / Windows / Linux)</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>아키텍처 자동 감지 (Intel/AMD, ARM64)</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>클릭 한 번으로 명령어 복사</span>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-muted/30 border border-border/50 rounded-lg">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4 rotate-[270deg]" />
+                  모달에서 <strong>명령어 복사</strong> 버튼을 클릭하면 다음 단계로 진행하세요.
                 </p>
               </div>
-
-              <p className="text-muted-foreground mt-4">명령어 예시 (Mac/Linux):</p>
-              <CodeBlock>{`curl -fsSL -H "X-API-Key: YOUR_API_KEY" "https://thinktrace.net/api/install-script?projectHash=xxx&os=mac" | bash`}</CodeBlock>
-
-              <p className="text-muted-foreground mt-4">명령어 예시 (Windows PowerShell):</p>
-              <CodeBlock>{`$headers = @{ "X-API-Key" = "YOUR_API_KEY" }; iwr -useb "https://thinktrace.net/api/install-script?projectHash=xxx&os=windows" -Headers $headers | iex`}</CodeBlock>
             </StepCard>
 
             <StepCard step={3} title="프로젝트 루트에서 명령어 실행" icon={CheckCircle2}>
-              <p className="text-muted-foreground">복사한 명령어를 프로젝트 루트 디렉토리에서 실행하세요:</p>
+              <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg mb-4">
+                <p className="text-sm text-green-500 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  위 모달에서 복사한 명령어를 사용합니다.
+                </p>
+              </div>
+
+              <p className="text-muted-foreground">터미널에서 프로젝트 루트 디렉토리로 이동 후 붙여넣기:</p>
               <CodeBlock>{`cd your-project
-# 복사한 명령어 붙여넣기`}</CodeBlock>
+# Ctrl+V (Windows) 또는 Cmd+V (Mac)로 붙여넣기 후 Enter`}</CodeBlock>
 
               <p className="text-muted-foreground mt-4">설치가 완료되면 다음과 같은 메시지가 표시됩니다:</p>
               <CodeBlock language="text">{`🚀 CodeTracker 설치를 시작합니다...
@@ -332,6 +357,16 @@ export function GuideContent() {
           <p>© 2024 ThinkTrace. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Demo Download Modal */}
+      <DownloadModal
+        open={showDemoModal}
+        onOpenChange={setShowDemoModal}
+        projectId="demo"
+        projectName="Sample Project"
+        projectHash="demo-hash-example"
+        apiKey="YOUR_API_KEY"
+      />
     </>
   )
 }

@@ -92,11 +92,25 @@ export interface AIInteraction {
   post_commit_id: number;
   prompt_text: string;
   claude_session_id: string | null;
+  conversation_start_id: number | null;
+  conversation_end_id: number | null;
   commit_hash?: string;
   started_at: string;
   ended_at: string | null;
   duration_seconds: number | null;
   files_modified: number;
+  created_at: string;
+}
+
+// ============================================================================
+// Conversation Messages
+// ============================================================================
+
+export interface ConversationMessage {
+  id: number;
+  interaction_id: number;
+  role: 'user' | 'assistant';
+  content: string;
   created_at: string;
 }
 

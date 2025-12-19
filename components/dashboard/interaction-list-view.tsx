@@ -1,14 +1,14 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X } from "lucide-react"
+import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, User, Bot } from "lucide-react"
 import { formatDistanceToNow, format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import type { AIInteraction } from '@/lib/supabase/queries'
+import type { AIInteraction, ConversationMessage } from '@/lib/api/types'
+import { fetchInteractionMessages } from '@/lib/api/client'
 import { DiffViewer, type FileChange } from './diff-viewer'
-import { useEffect } from 'react'
 
 interface InteractionListViewProps {
   interactions: AIInteraction[];
@@ -114,8 +114,11 @@ interface InteractionDetailModalProps {
 
 function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDetailModalProps) {
   const [fileChanges, setFileChanges] = useState<FileChange[] | null>(null);
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [messagesError, setMessagesError] = useState<string | null>(null);
 
   // Diff 데이터 로드
   useEffect(() => {
@@ -150,6 +153,25 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
     fetchDiff();
   }, [interaction.id, apiKey]);
 
+  // 대화 메시지 로드
+  useEffect(() => {
+    const loadMessages = async () => {
+      setMessagesLoading(true);
+      setMessagesError(null);
+      try {
+        const data = await fetchInteractionMessages(interaction.id, apiKey);
+        setMessages(data);
+      } catch (err) {
+        console.error('Error fetching messages:', err);
+        setMessagesError('대화 메시지를 불러오는데 실패했습니다.');
+      } finally {
+        setMessagesLoading(false);
+      }
+    };
+
+    loadMessages();
+  }, [interaction.id, apiKey]);
+
   const startedDate = format(new Date(interaction.started_at), 'yyyy-MM-dd HH:mm:ss', { locale: ko });
 
   return (
@@ -179,6 +201,12 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
                 )}
                 <span>•</span>
                 <span>{interaction.files_modified}개 파일 수정</span>
+                {interaction.claude_session_id && (
+                  <>
+                    <span>•</span>
+                    <span className="font-mono text-xs">세션: {interaction.claude_session_id.slice(0, 8)}...</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -189,17 +217,72 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
 
         {/* 모달 내용 */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* 프롬프트 */}
+          {/* 대화 내용 */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              사용자 프롬프트
+              대화 내용
             </h3>
-            <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {interaction.prompt_text}
-              </p>
-            </div>
+            {messagesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground">대화 메시지를 불러오는 중...</span>
+              </div>
+            ) : messagesError ? (
+              <div className="text-center py-8 text-red-500">
+                <p>{messagesError}</p>
+              </div>
+            ) : messages.length === 0 ? (
+              // 대화 메시지가 없으면 기존 프롬프트 표시
+              <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
+                    <User className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground mb-1">사용자</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {interaction.prompt_text}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // 대화 메시지 목록 - 고정 높이 스크롤 컨테이너
+              <div className="border border-border/50 rounded-lg bg-accent/5 max-h-[400px] overflow-y-auto">
+                <div className="p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className="flex items-start gap-3">
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                        message.role === 'user'
+                          ? 'bg-blue-500/10'
+                          : 'bg-primary/10'
+                      }`}>
+                        {message.role === 'user' ? (
+                          <User className="h-4 w-4 text-blue-500" />
+                        ) : (
+                          <Bot className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {message.role === 'user' ? '사용자' : 'AI 어시스턴트'}
+                        </p>
+                        <div className={`rounded-lg p-3 ${
+                          message.role === 'user'
+                            ? 'bg-blue-500/5 border border-blue-500/20'
+                            : 'bg-primary/5 border border-primary/20'
+                        }`}>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            {message.content}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 변경사항 */}

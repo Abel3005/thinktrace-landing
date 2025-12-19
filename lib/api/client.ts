@@ -74,7 +74,7 @@ async function apiRequest<T>(
 // Statistics API
 // ============================================================================
 
-import type { UserStatistics, ContributionData, ProjectStatistics, ProjectInfo, ProjectCommit, AIInteraction, RepositoryLookup } from './types';
+import type { UserStatistics, ContributionData, ProjectStatistics, ProjectInfo, ProjectCommit, AIInteraction, RepositoryLookup, ConversationMessage } from './types';
 
 export async function fetchUserStatistics(
   userId: string,
@@ -242,6 +242,21 @@ export async function fetchProjectInteractions(
     );
   } catch (error) {
     console.error('Failed to fetch project interactions:', error);
+    return [];
+  }
+}
+
+export async function fetchInteractionMessages(
+  interactionId: number,
+  apiKey?: string
+): Promise<ConversationMessage[]> {
+  try {
+    return await apiRequest<ConversationMessage[]>(
+      `/api/interactions/${interactionId}/messages`,
+      { apiKey }
+    );
+  } catch (error) {
+    console.error('Failed to fetch interaction messages:', error);
     return [];
   }
 }

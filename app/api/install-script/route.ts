@@ -92,16 +92,19 @@ Write-Host "Starting CodeTracker installation..." -ForegroundColor Cyan
 
 # Check current directory
 $projectIndicators = @(".git", "package.json", "Cargo.toml", "go.mod")
+$isProjectRoot = $projectIndicators | Where-Object { Test-Path $_ }
+
+Write-Host "check" -ForegroundColor Cyan
 
 # Create temporary file
 $TmpZip = [System.IO.Path]::GetTempFileName() + ".zip"
-
+Write-Host "check" -ForegroundColor Cyan
 try {
     # Download using curl
     Write-Host "Downloading files..." -ForegroundColor Cyan
     $url = "${baseUrl}/api/download-codetracker?projectHash=${projectHash}&platform=windows-amd64"
     curl.exe -fsSL -H "X-API-Key: ${apiKey}" $url -o $TmpZip
-
+    
     if (-not (Test-Path $TmpZip) -or (Get-Item $TmpZip).Length -eq 0) {
         throw "Download failed"
     }

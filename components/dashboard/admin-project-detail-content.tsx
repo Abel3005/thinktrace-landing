@@ -223,31 +223,54 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
             </div>
           ) : (
             <div className="space-y-3">
-              {workTreeHistory.map((item) => (
-                <div
-                  key={item.id}
-                  className="border border-border/50 rounded-lg p-4 bg-card/50 hover:bg-card transition-colors cursor-pointer"
-                  onClick={() => setSelectedWorkTree(item)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <GitBranch className="h-5 w-5 text-primary" />
+              {workTreeHistory.map((item) => {
+                const isCompleted = item.status === 'completed';
+                const statusConfig = {
+                  pending: { label: '대기 중', color: 'text-yellow-500 bg-yellow-500/10', icon: Timer },
+                  processing: { label: '처리 중', color: 'text-blue-500 bg-blue-500/10', icon: Loader2 },
+                  completed: { label: '완료', color: 'text-green-500 bg-green-500/10', icon: CheckCircle2 },
+                  failed: { label: '실패', color: 'text-red-500 bg-red-500/10', icon: AlertCircle },
+                };
+                const status = statusConfig[item.status] || statusConfig.pending;
+                const StatusIcon = status.icon;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`border border-border/50 rounded-lg p-4 bg-card/50 transition-colors ${
+                      isCompleted ? 'hover:bg-card cursor-pointer' : 'opacity-70 cursor-not-allowed'
+                    }`}
+                    onClick={() => isCompleted && setSelectedWorkTree(item)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                          <GitBranch className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">Work-tree #{item.id}</p>
+                            <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${status.color}`}>
+                              <StatusIcon className={`h-3 w-3 ${item.status === 'processing' ? 'animate-spin' : ''}`} />
+                              {status.label}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {format(new Date(item.created_at), 'yyyy년 MM월 dd일 HH:mm', { locale: ko })}
+                          </p>
+                          {item.error_message && (
+                            <p className="text-xs text-red-500 mt-1">{item.error_message}</p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">Work-tree #{item.id}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {format(new Date(item.created_at), 'yyyy년 MM월 dd일 HH:mm', { locale: ko })}
-                        </p>
-                      </div>
+                      <Button variant="ghost" size="sm" disabled={!isCompleted}>
+                        {isCompleted ? '상세 보기' : '대기 중'}
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      상세 보기
-                    </Button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

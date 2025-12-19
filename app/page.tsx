@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Users, GitBranch, Brain, TrendingUp, FileSearch, BarChart3 } from "lucide-react"
@@ -76,11 +77,13 @@ export default function Home() {
                 <div className="order-1 lg:order-2">
                   <Card className="border-2 border-border/50 bg-card/50 overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[4/3] bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20 flex items-center justify-center">
-                        <div className="text-center p-8">
-                          <GitBranch className="h-20 w-20 mx-auto mb-4 text-primary/60" />
-                          <p className="text-sm text-muted-foreground">작업 과정 시각화</p>
-                        </div>
+                      <div className="aspect-[4/3] relative">
+                        <Image
+                          src="/Process-oriented evaluation.png"
+                          alt="과정 중심 평가 - AI 작업 상세 화면"
+                          fill
+                          className="object-cover object-top"
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -186,11 +189,13 @@ export default function Home() {
                 <div className="order-1">
                   <Card className="border-2 border-border/50 bg-card/50 overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[4/3] bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 flex items-center justify-center">
-                        <div className="text-center p-8">
-                          <FileSearch className="h-20 w-20 mx-auto mb-4 text-primary/60" />
-                          <p className="text-sm text-muted-foreground">작업 구조 분석</p>
-                        </div>
+                      <div className="aspect-[4/3] relative">
+                        <Image
+                          src="/work-tree.png"
+                          alt="작업 그룹별 상세 분석 - Work-tree 화면"
+                          fill
+                          className="object-cover object-top"
+                        />
                       </div>
                     </CardContent>
                   </Card>

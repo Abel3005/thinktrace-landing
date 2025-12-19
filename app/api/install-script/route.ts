@@ -92,16 +92,6 @@ Write-Host "Starting CodeTracker installation..." -ForegroundColor Cyan
 
 # Check current directory
 $projectIndicators = @(".git", "package.json", "Cargo.toml", "go.mod")
-$isProjectRoot = $projectIndicators | Where-Object { Test-Path $_ }
-
-if (-not $isProjectRoot) {
-    Write-Host "Warning: It is recommended to run this in your project root directory." -ForegroundColor Yellow
-    $response = Read-Host "Do you want to continue? (y/N)"
-    if ($response -notmatch "^[Yy]$") {
-        Write-Host "Installation cancelled."
-        exit 1
-    }
-}
 
 # Create temporary file
 $TmpZip = [System.IO.Path]::GetTempFileName() + ".zip"

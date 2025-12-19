@@ -83,60 +83,60 @@ function generatePowerShellScript(
   projectHash: string,
   apiKey: string
 ): string {
-  return `# CodeTracker 설치 스크립트 (Windows)
+  return `# CodeTracker Installation Script (Windows)
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-Write-Host "🚀 CodeTracker 설치를 시작합니다..." -ForegroundColor Cyan
+Write-Host "Starting CodeTracker installation..." -ForegroundColor Cyan
 
-# 현재 디렉토리 확인
+# Check current directory
 $projectIndicators = @(".git", "package.json", "Cargo.toml", "go.mod")
 $isProjectRoot = $projectIndicators | Where-Object { Test-Path $_ }
 
 if (-not $isProjectRoot) {
-    Write-Host "⚠️  경고: 프로젝트 루트 디렉토리에서 실행하는 것을 권장합니다." -ForegroundColor Yellow
-    $response = Read-Host "계속하시겠습니까? (y/N)"
+    Write-Host "Warning: It is recommended to run this in your project root directory." -ForegroundColor Yellow
+    $response = Read-Host "Do you want to continue? (y/N)"
     if ($response -notmatch "^[Yy]$") {
-        Write-Host "설치가 취소되었습니다."
+        Write-Host "Installation cancelled."
         exit 1
     }
 }
 
-# 임시 파일 생성
+# Create temporary file
 $TmpZip = [System.IO.Path]::GetTempFileName() + ".zip"
 
 try {
-    # 다운로드 (curl 사용)
-    Write-Host "📥 파일 다운로드 중..." -ForegroundColor Cyan
+    # Download using curl
+    Write-Host "Downloading files..." -ForegroundColor Cyan
     $url = "${baseUrl}/api/download-codetracker?projectHash=${projectHash}&platform=windows-amd64"
     curl.exe -fsSL -H "X-API-Key: ${apiKey}" $url -o $TmpZip
 
     if (-not (Test-Path $TmpZip) -or (Get-Item $TmpZip).Length -eq 0) {
-        throw "다운로드 실패"
+        throw "Download failed"
     }
 
-    # 압축 해제
-    Write-Host "📦 파일 압축 해제 중..." -ForegroundColor Cyan
+    # Extract archive
+    Write-Host "Extracting files..." -ForegroundColor Cyan
     Expand-Archive -Path $TmpZip -DestinationPath . -Force
 
     Write-Host ""
-    Write-Host "✅ CodeTracker 설치 완료!" -ForegroundColor Green
+    Write-Host "CodeTracker installation complete!" -ForegroundColor Green
     Write-Host ""
-    Write-Host "📁 설치된 파일:" -ForegroundColor Cyan
+    Write-Host "Installed files:" -ForegroundColor Cyan
     Write-Host "   .codetracker\\config.json"
     Write-Host "   .codetracker\\credentials.json"
     Write-Host "   .claude\\settings.json"
     Write-Host "   .claude\\hooks\\user_prompt_submit.exe"
     Write-Host "   .claude\\hooks\\stop.exe"
     Write-Host ""
-    Write-Host "💡 Claude Code를 실행하면 자동으로 CodeTracker가 활성화됩니다." -ForegroundColor Yellow
+    Write-Host "CodeTracker will be activated automatically when you run Claude Code." -ForegroundColor Yellow
 
 } catch {
-    Write-Host "❌ 설치 실패: \$_" -ForegroundColor Red
+    Write-Host "Installation failed: \$_" -ForegroundColor Red
     exit 1
 } finally {
-    # 정리
+    # Cleanup
     if (Test-Path $TmpZip) {
         Remove-Item $TmpZip -Force
     }

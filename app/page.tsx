@@ -193,11 +193,13 @@ export default function Home() {
                 <div className="order-1">
                   <Card className="border-2 border-border/50 bg-card/50 overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="aspect-[4/3] bg-gradient-to-br from-accent/20 via-primary/20 to-secondary/20 flex items-center justify-center">
-                        <div className="text-center p-8">
-                          <Brain className="h-20 w-20 mx-auto mb-4 text-accent/60" />
-                          <p className="text-sm text-muted-foreground">사고 패턴 분석</p>
-                        </div>
+                      <div className="aspect-[4/3] relative">
+                        <Image
+                          src="/think-tracing.png"
+                          alt="사고 과정 추적 - AI 활용 패턴 분석"
+                          fill
+                          className="object-cover object-top"
+                        />
                       </div>
                     </CardContent>
                   </Card>

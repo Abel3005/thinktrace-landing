@@ -277,7 +277,7 @@ function InteractionDetailModal({ interaction, apiKey, onClose }: InteractionDet
                         }`}>
                           <div className="markdown-content">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {message.content}
+                              {message.content.replace(/\\n/g, '\n')}
                             </ReactMarkdown>
                           </div>
                         </div>

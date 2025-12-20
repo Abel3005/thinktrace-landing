@@ -198,16 +198,22 @@ export default function Home() {
                           src="/think-tracing.png"
                           alt="사고 과정 추적 - AI 활용 패턴 분석"
                           fill
-                          className="object-cover object-top"
+                          className="object-cover object-top blur-sm"
                         />
+                        <div className="absolute inset-0 bg-background/30" />
                       </div>
                     </CardContent>
                   </Card>
                 </div>
                 <div className="space-y-6 order-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium">
-                    <Brain className="h-4 w-4" />
-                    사고 과정 추적
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-sm font-medium">
+                      <Brain className="h-4 w-4" />
+                      사고 과정 추적
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-semibold border border-amber-500/20">
+                      Coming Soon
+                    </span>
                   </div>
                   <h3 className="text-3xl font-bold">AI 활용 패턴을 분석합니다</h3>
                   <p className="text-lg text-muted-foreground leading-relaxed">

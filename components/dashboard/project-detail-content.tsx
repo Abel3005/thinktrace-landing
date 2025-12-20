@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon, Trash2, FileBarChart, MessageSquare } from "lucide-react"
+import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon, Trash2, FileBarChart, MessageSquare, FolderTree } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
@@ -13,6 +13,7 @@ import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
 import { DownloadButton } from './download-button'
 import { TopTasksReport } from './top-tasks-report'
 import { InteractionListView } from './interaction-list-view'
+import { WorkTreeGraphView } from './work-tree-graph-view'
 import {
   Dialog,
   DialogContent,
@@ -159,10 +160,14 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
 
       {/* 탭 컨텐츠 */}
       <Tabs defaultValue="report" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-xl">
           <TabsTrigger value="report" className="flex items-center gap-2">
             <FileBarChart className="h-4 w-4" />
             주요 작업 분석
+          </TabsTrigger>
+          <TabsTrigger value="work-tree" className="flex items-center gap-2">
+            <FolderTree className="h-4 w-4" />
+            작업 트리
           </TabsTrigger>
           <TabsTrigger value="interactions" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
@@ -172,6 +177,13 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
         <TabsContent value="report" className="mt-6">
           <TopTasksReport
             projectId={project.id}
+            apiKey={apiKey}
+          />
+        </TabsContent>
+        <TabsContent value="work-tree" className="mt-6">
+          <WorkTreeGraphView
+            projectId={project.id}
+            interactions={interactions}
             apiKey={apiKey}
           />
         </TabsContent>

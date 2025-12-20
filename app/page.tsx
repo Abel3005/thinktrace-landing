@@ -139,36 +139,36 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 기능 3: 상세한 통계 및 인사이트 */}
+              {/* 기능 3: 작업 기반 인사이트 */}
               <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 <div className="space-y-6 order-2 lg:order-1">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary-foreground text-sm font-medium">
                     <BarChart3 className="h-4 w-4" />
-                    상세 통계
+                    작업 분석
                   </div>
-                  <h3 className="text-3xl font-bold">데이터 기반 인사이트 제공</h3>
+                  <h3 className="text-3xl font-bold">작업 기반 인사이트 제공</h3>
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    프로젝트별, 기간별 상세한 통계를 제공하여 AI 활용 역량의 변화를 추적합니다.
-                    커밋 빈도, 코드 변경량, AI 활용도 등 다양한 지표를 시각화합니다.
+                    사용자의 의도부터 최종 결과까지, 작업이 진행되는 전체 과정을 분석하여 인사이트를 제공합니다.
+                    각 작업의 실행 흐름과 AI 협업 패턴을 통해 효율성을 평가하고 개선점을 제안합니다.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-start gap-2">
                       <div className="mt-1 rounded-full bg-secondary/20 p-1">
                         <div className="h-2 w-2 rounded-full bg-secondary-foreground" />
                       </div>
-                      <span className="text-muted-foreground">일일 기여도 히트맵</span>
+                      <span className="text-muted-foreground">사용자 의도와 최종 결과 비교 분석</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="mt-1 rounded-full bg-secondary/20 p-1">
                         <div className="h-2 w-2 rounded-full bg-secondary-foreground" />
                       </div>
-                      <span className="text-muted-foreground">프로젝트별 성과 대시보드</span>
+                      <span className="text-muted-foreground">작업 실행 흐름 시각화</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="mt-1 rounded-full bg-secondary/20 p-1">
                         <div className="h-2 w-2 rounded-full bg-secondary-foreground" />
                       </div>
-                      <span className="text-muted-foreground">AI 활용 트렌드 분석</span>
+                      <span className="text-muted-foreground">작업 흐름 평가 및 개선 제안</span>
                     </li>
                   </ul>
                 </div>

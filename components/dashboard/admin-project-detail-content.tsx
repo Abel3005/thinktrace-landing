@@ -1,13 +1,16 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, GitBranch, Play, History, CheckCircle2, AlertCircle, Timer } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, GitBranch, Play, History, CheckCircle2, AlertCircle, Timer, FileBarChart, FolderTree } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow, format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { useState, useEffect, useCallback } from 'react'
 import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
 import { InteractionListView } from './interaction-list-view'
+import { TopTasksReport } from './top-tasks-report'
+import { WorkTreeGraphView } from './work-tree-graph-view'
 
 interface WorkTreeHistoryItem {
   id: number;
@@ -276,24 +279,42 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
         </CardContent>
       </Card>
 
-      {/* 작업 그룹 기반 보고서 */}
-      <Card className="border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
+      {/* 탭 컨텐츠 */}
+      <Tabs defaultValue="report" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 max-w-xl">
+          <TabsTrigger value="report" className="flex items-center gap-2">
+            <FileBarChart className="h-4 w-4" />
+            주요 작업 분석
+          </TabsTrigger>
+          <TabsTrigger value="work-tree" className="flex items-center gap-2">
+            <FolderTree className="h-4 w-4" />
             작업 트리
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            AI가 추론한 작업 그룹별로 상호작용 기록을 확인할 수 있습니다.
-          </p>
-        </CardHeader>
-        <CardContent>
+          </TabsTrigger>
+          <TabsTrigger value="interactions" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            AI 상호작용
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="report" className="mt-6">
+          <TopTasksReport
+            projectId={project.id}
+            apiKey={apiKey}
+          />
+        </TabsContent>
+        <TabsContent value="work-tree" className="mt-6">
+          <WorkTreeGraphView
+            projectId={project.id}
+            interactions={interactions}
+            apiKey={apiKey}
+          />
+        </TabsContent>
+        <TabsContent value="interactions" className="mt-6">
           <InteractionListView
             interactions={interactions}
             apiKey={apiKey}
           />
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Work-tree 상세 모달 */}
       {selectedWorkTree && (

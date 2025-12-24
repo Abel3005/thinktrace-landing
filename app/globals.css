@@ -254,3 +254,317 @@
 .markdown-content > *:last-child {
   margin-bottom: 0;
 }
+
+/* Tiptap 에디터 스타일 */
+.tiptap-editor {
+  min-height: 500px;
+  outline: none;
+}
+
+.tiptap-editor:focus {
+  outline: none;
+}
+
+.tiptap-editor p {
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap-editor h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  line-height: 1.25;
+}
+
+.tiptap-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+  line-height: 1.3;
+}
+
+.tiptap-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.tiptap-editor ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor li {
+  margin: 0.25rem 0;
+}
+
+.tiptap-editor blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.tiptap-editor code {
+  background-color: var(--muted);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+}
+
+.tiptap-editor strong {
+  font-weight: 600;
+}
+
+.tiptap-editor em {
+  font-style: italic;
+}
+
+.tiptap-editor u {
+  text-decoration: underline;
+}
+
+.tiptap-editor s {
+  text-decoration: line-through;
+}
+
+.tiptap-editor > *:first-child {
+  margin-top: 0;
+}
+
+.tiptap-editor > *:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap-editor a {
+  color: var(--primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap-editor a:hover {
+  opacity: 0.8;
+}
+
+.tiptap-editor mark {
+  border-radius: 0.125rem;
+  padding: 0.125rem 0;
+}
+
+.tiptap-editor sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+.tiptap-editor sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+}
+
+.tiptap-editor hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* ================================================
+   구글 독스 스타일 - 문서 편집기 라이트 테마
+   ================================================ */
+
+/* 전체 컨테이너 */
+.docs-editor-container {
+  background-color: #f8f9fa;
+  color: #202124;
+}
+
+/* 헤더 */
+.docs-header {
+  background-color: #ffffff;
+  border-bottom-color: #e0e0e0;
+}
+
+.docs-back-button {
+  color: #5f6368;
+  transition: background-color 0.2s;
+}
+
+.docs-back-button:hover {
+  background-color: #f1f3f4;
+}
+
+.docs-title-input {
+  color: #202124;
+}
+
+.docs-title-input::placeholder {
+  color: #80868b;
+}
+
+/* 툴바 */
+.docs-toolbar {
+  background-color: #f9fbfd;
+  border-bottom-color: #e0e0e0;
+}
+
+.docs-toolbar-inner {
+  /* 내부 정렬 */
+}
+
+.docs-toolbar-btn {
+  color: #444746;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.docs-toolbar-btn:hover {
+  background-color: #e8eaed;
+}
+
+.docs-toolbar-btn.active {
+  background-color: #d3e3fd;
+  color: #1967d2;
+}
+
+.docs-toolbar-select {
+  color: #444746;
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.docs-toolbar-select:hover {
+  background-color: #e8eaed;
+}
+
+.docs-toolbar-divider {
+  background-color: #dadce0;
+}
+
+/* 드롭다운 */
+.docs-dropdown {
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  box-shadow: 0 2px 6px 2px rgba(60,64,67,0.15);
+}
+
+.docs-dropdown-item {
+  color: #202124;
+}
+
+.docs-dropdown-item:hover {
+  background-color: #f1f3f4;
+}
+
+/* 줌 컨트롤 */
+.docs-zoom-control {
+  background-color: transparent;
+}
+
+.docs-zoom-select {
+  color: #444746;
+}
+
+.docs-zoom-select option {
+  background-color: #ffffff;
+  color: #202124;
+}
+
+/* 캔버스 (에디터 배경) */
+.docs-canvas {
+  background-color: #f1f3f4;
+}
+
+/* A4 페이지 */
+.a4-page {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 1px rgba(60,64,67,0.15);
+  border-radius: 2px;
+  padding: 96px 72px;
+  position: relative;
+}
+
+/* 페이지 구분선 - A4 높이마다 점선 표시 */
+.a4-page::after {
+  content: '';
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  top: 1123px; /* A4 높이 */
+  border-top: 1px dashed #c0c0c0;
+  pointer-events: none;
+  /* 반복 구분선 */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 1122px,
+    transparent 1122px
+  );
+}
+
+/* 에디터 영역 */
+.a4-page .tiptap-editor {
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #202124;
+  min-height: calc(1123px - 192px); /* A4 높이 - 상하 패딩 */
+  /* 페이지 구분선 배경 */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 930px,
+    #e8f0fe 930px,
+    #e8f0fe 932px,
+    transparent 932px,
+    transparent 1123px
+  );
+  background-size: 100% 1123px;
+  background-position: 0 -96px;
+}
+
+/* A4 페이지 내부 요소 */
+.a4-page .tiptap-editor h1,
+.a4-page .tiptap-editor h2,
+.a4-page .tiptap-editor h3,
+.a4-page .tiptap-editor p,
+.a4-page .tiptap-editor li {
+  color: #202124;
+}
+
+.a4-page .tiptap-editor blockquote {
+  border-left-color: #1a73e8;
+  color: #5f6368;
+}
+
+.a4-page .tiptap-editor code {
+  background-color: #f1f3f4;
+  color: #202124;
+}
+
+.a4-page .tiptap-editor hr {
+  border-top-color: #dadce0;
+}
+
+.a4-page .tiptap-editor a {
+  color: #1a73e8;
+}
+
+.a4-page .tiptap-editor p.is-editor-empty:first-child::before {
+  color: #80868b;
+}

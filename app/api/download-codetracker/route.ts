@@ -18,11 +18,12 @@ function getSettingsForPlatform(platform: Platform): object {
   const isWindows = platform === 'windows-amd64';
   const ext = isWindows ? '.exe' : '';
   const pathSep = isWindows ? '\\\\' : '/';
+  const homeDir = isWindows ? '%USERPROFILE%' : '$HOME';
 
   const hookPath = (name: string) =>
     isWindows
-      ? `.claude${pathSep}hooks${pathSep}${name}${ext}`
-      : `.claude/hooks/${name}`;
+      ? `${homeDir}${pathSep}.claude${pathSep}hooks${pathSep}${name}${ext}`
+      : `${homeDir}/.claude/hooks/${name}`;
 
   return {
     hooks: {
@@ -193,7 +194,7 @@ export async function GET(request: NextRequest) {
     // 새 zip 파일 생성
     const zip = new JSZip();
 
-    // .codetracker 폴더 생성
+    // .codetracker 폴더 생성 (홈 디렉터리용)
     const codetrackerFolder = zip.folder('.codetracker');
 
     // config.json 읽기 (tmp 폴더에서)
@@ -206,11 +207,10 @@ export async function GET(request: NextRequest) {
       api_key: userData.api_key,
       username: userData.username,
       email: userData.email,
-      current_project_hash: project.repo_hash,
     };
     codetrackerFolder?.file('credentials.json', JSON.stringify(credentials, null, 2));
 
-    // .claude 폴더 생성
+    // .claude 폴더 생성 (글로벌 설정용)
     const claudeFolder = zip.folder('.claude');
     const hooksFolder = claudeFolder?.folder('hooks');
 
@@ -259,7 +259,7 @@ export async function GET(request: NextRequest) {
       'linux-arm64': 'linux_arm',
       'windows-amd64': 'win',
     };
-    const filename = `codetracker_${project.repo_name.replace(/[^a-zA-Z0-9]/g, '_')}_${platformShort[platform]}.zip`;
+    const filename = `codetracker_${platformShort[platform]}.zip`;
 
     // 응답 헤더 설정 및 zip 파일 반환
     return new NextResponse(new Uint8Array(zipBuffer), {

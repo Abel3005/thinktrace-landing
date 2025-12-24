@@ -54,7 +54,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* 프로젝트 리스트 */}
-          <ProjectList projects={projects} userId={authUser.id} apiKey={userData?.api_key || ''} />
+          <ProjectList projects={projects} apiKey={userData?.api_key || ''} />
         </div>
       </main>
     </div>

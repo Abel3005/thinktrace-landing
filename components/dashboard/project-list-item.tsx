@@ -98,15 +98,6 @@ export function ProjectListItem({ project, apiKey, onDelete }: ProjectListItemPr
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-lg truncate hover:text-primary transition-colors">{project.repo_name}</h3>
                   <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                  {project.interaction_count > 1 ? (
-                    <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
-                      테스트 완료
-                    </span>
-                  ) : (
-                    <span className="shrink-0 text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                      테스트 전
-                    </span>
-                  )}
                 </div>
                 {project.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2 mt-1">

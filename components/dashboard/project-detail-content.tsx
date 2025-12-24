@@ -82,14 +82,7 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
           </Button>
         </Link>
         <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">{project.repo_name}</h1>
-            {stats.totalInteractions > 1 && (
-              <span className="shrink-0 text-sm px-3 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
-                테스트 완료
-              </span>
-            )}
-          </div>
+          <h1 className="text-3xl font-bold">{project.repo_name}</h1>
           {project.description && (
             <p className="text-muted-foreground mt-1">{project.description}</p>
           )}

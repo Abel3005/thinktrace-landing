@@ -61,6 +61,26 @@ const osOptions: { os: SimpleOS; label: string; icon: React.ReactNode }[] = [
   { os: 'linux', label: 'Linux', icon: <Terminal className="h-4 w-4" /> },
 ]
 
+type MergeMethod = 'python' | 'nodejs' | 'jq'
+
+const mergeMethodInfo: Record<MergeMethod, { label: string; description: string; requirement: string }> = {
+  python: {
+    label: 'Python 3',
+    description: 'macOS/Linux에 기본 설치되어 있는 경우가 많음',
+    requirement: 'python3 필요',
+  },
+  nodejs: {
+    label: 'Node.js',
+    description: '개발자 환경에 가장 많이 설치되어 있음',
+    requirement: 'node 필요',
+  },
+  jq: {
+    label: 'jq',
+    description: 'JSON 전문 CLI 도구 (가장 빠름)',
+    requirement: 'jq 별도 설치 필요',
+  },
+}
+
 export function DownloadModal({
   open,
   onOpenChange,
@@ -72,6 +92,7 @@ export function DownloadModal({
   const [copied, setCopied] = useState(false)
   const [uninstallCopied, setUninstallCopied] = useState(false)
   const [selectedOS, setSelectedOS] = useState<SimpleOS>(initialOS || 'mac')
+  const [mergeMethod, setMergeMethod] = useState<MergeMethod>('nodejs')
 
   // 모달이 열릴 때 OS 감지
   useEffect(() => {
@@ -91,14 +112,14 @@ export function DownloadModal({
 
   // 설치 명령어 생성
   const installCommand = useMemo(() => {
-    const scriptUrl = `${baseUrl}/api/install-script?projectHash=${projectHash}&os=${selectedOS}`
+    const scriptUrl = `${baseUrl}/api/install-script?projectHash=${projectHash}&os=${selectedOS}&mergeMethod=${mergeMethod}`
 
     if (isWindows) {
       return `curl.exe -fsSL -H "X-API-Key: ${apiKey}" "${scriptUrl}" | powershell -`
     } else {
       return `curl -fsSL -H "X-API-Key: ${apiKey}" "${scriptUrl}" | bash`
     }
-  }, [baseUrl, projectHash, apiKey, selectedOS, isWindows])
+  }, [baseUrl, projectHash, apiKey, selectedOS, isWindows, mergeMethod])
 
   // 삭제 명령어 생성
   const uninstallCommand = useMemo(() => {
@@ -160,6 +181,39 @@ export function DownloadModal({
                 </Button>
               ))}
             </div>
+          </div>
+
+          {/* 병합 방법 선택 */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">설정 병합 방법</h4>
+            <p className="text-xs text-muted-foreground">
+              기존 <code className="text-xs bg-muted px-1 py-0.5 rounded">{isWindows ? '%USERPROFILE%\\.claude\\settings.json' : '~/.claude/settings.json'}</code> 파일과 병합할 때 사용할 도구를 선택하세요.
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(mergeMethodInfo) as MergeMethod[]).map((method) => {
+                const info = mergeMethodInfo[method]
+                return (
+                  <Button
+                    key={method}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setMergeMethod(method)}
+                    className={cn(
+                      "flex flex-col items-start gap-1 h-auto py-3 px-3",
+                      mergeMethod === method && "border-primary bg-primary/10 text-primary"
+                    )}
+                  >
+                    <span className="font-medium text-sm">{info.label}</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">
+                      {info.requirement}
+                    </span>
+                  </Button>
+                )
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {mergeMethodInfo[mergeMethod].description}
+            </p>
           </div>
 
           {/* OS 정보 */}

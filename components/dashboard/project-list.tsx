@@ -4,23 +4,17 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { FolderGit2 } from "lucide-react"
 import { ProjectListItem, ProjectStatistics } from "./project-list-item"
-import { AddProjectDialog } from "./add-project-dialog"
 
 interface ProjectListProps {
   projects: ProjectStatistics[];
-  userId: string;
   apiKey: string;
 }
 
-export function ProjectList({ projects: initialProjects, userId, apiKey }: ProjectListProps) {
+export function ProjectList({ projects: initialProjects, apiKey }: ProjectListProps) {
   const [projects, setProjects] = useState<ProjectStatistics[]>(initialProjects);
 
   const handleDeleteProject = (projectId: number) => {
     setProjects(prev => prev.filter(p => p.repo_id !== projectId));
-  };
-
-  const handleAddProject = (newProject: ProjectStatistics) => {
-    setProjects(prev => [newProject, ...prev]);
   };
 
   if (!projects || projects.length === 0) {
@@ -28,8 +22,7 @@ export function ProjectList({ projects: initialProjects, userId, apiKey }: Proje
       <Card className="border-border/50 bg-card/50">
         <CardContent className="py-12 text-center">
           <FolderGit2 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-4">아직 프로젝트가 없습니다.</p>
-          <AddProjectDialog userId={userId} onProjectCreated={handleAddProject} />
+          <p className="text-muted-foreground">아직 프로젝트가 없습니다.</p>
         </CardContent>
       </Card>
     );
@@ -39,10 +32,7 @@ export function ProjectList({ projects: initialProjects, userId, apiKey }: Proje
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">프로젝트</h2>
-        <div className="flex items-center gap-4">
-          <p className="text-sm text-muted-foreground">총 {projects.length}개</p>
-          <AddProjectDialog userId={userId} onProjectCreated={handleAddProject} />
-        </div>
+        <p className="text-sm text-muted-foreground">총 {projects.length}개</p>
       </div>
 
       <div className="space-y-3">

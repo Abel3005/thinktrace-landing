@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { File } from "lucide-react"
+import { File, ChevronDown, ChevronRight } from "lucide-react"
 
 export interface DiffLine {
   type: "context" | "insert" | "delete" | "replace-old" | "replace-new";
@@ -55,6 +56,8 @@ export function DiffViewer({ fileChanges }: DiffViewerProps) {
 }
 
 function FileChangeView({ fileChange }: { fileChange: FileChange }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const totalAdditions = fileChange.hunks.reduce(
     (sum, hunk) => sum + hunk.lines.filter(l => l.type === "insert" || l.type === "replace-new").length,
     0
@@ -67,9 +70,17 @@ function FileChangeView({ fileChange }: { fileChange: FileChange }) {
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
-      {/* 파일 헤더 */}
-      <div className="bg-muted/50 px-4 py-3 flex items-center justify-between border-b border-border">
+      {/* 파일 헤더 - 클릭 가능 */}
+      <div
+        className="bg-muted/50 px-4 py-3 flex items-center justify-between border-b border-border cursor-pointer hover:bg-muted/70 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <div className="flex items-center gap-2">
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          )}
           <File className="h-4 w-4 text-muted-foreground" />
           <span className="font-mono text-sm font-medium">{fileChange.file_path}</span>
         </div>
@@ -83,12 +94,14 @@ function FileChangeView({ fileChange }: { fileChange: FileChange }) {
         </div>
       </div>
 
-      {/* Diff 내용 */}
-      <div className="font-mono text-xs overflow-x-auto">
-        {fileChange.hunks.map((hunk, hunkIdx) => (
-          <HunkView key={hunkIdx} hunk={hunk} />
-        ))}
-      </div>
+      {/* Diff 내용 - 접혔을 때는 숨김 */}
+      {isExpanded && (
+        <div className="font-mono text-xs overflow-x-auto">
+          {fileChange.hunks.map((hunk, hunkIdx) => (
+            <HunkView key={hunkIdx} hunk={hunk} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

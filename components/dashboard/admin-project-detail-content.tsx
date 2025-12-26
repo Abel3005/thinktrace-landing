@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, GitBranch, Play, History, CheckCircle2, AlertCircle, Timer, FileBarChart, FolderTree } from "lucide-react"
+import { Sparkles, Clock, MessageSquare, FileEdit, Loader2, X, File as FileIcon, GitBranch, Play, History, CheckCircle2, AlertCircle, Timer, FileBarChart, FolderTree, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow, format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -11,6 +11,7 @@ import type { ProjectInfo, AIInteraction } from '@/lib/supabase/queries'
 import { InteractionListView } from './interaction-list-view'
 import { TopTasksReport } from './top-tasks-report'
 import { WorkTreeGraphView } from './work-tree-graph-view'
+import { ComprehensiveAssessmentView } from './comprehensive-assessment-view'
 
 interface WorkTreeHistoryItem {
   id: number;
@@ -281,7 +282,7 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
 
       {/* 탭 컨텐츠 */}
       <Tabs defaultValue="report" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
           <TabsTrigger value="report" className="flex items-center gap-2">
             <FileBarChart className="h-4 w-4" />
             주요 작업 분석
@@ -293,6 +294,10 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
           <TabsTrigger value="interactions" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             AI 상호작용
+          </TabsTrigger>
+          <TabsTrigger value="assessment" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            종합 평가
           </TabsTrigger>
         </TabsList>
         <TabsContent value="report" className="mt-6">
@@ -311,6 +316,12 @@ export function AdminProjectDetailContent({ project, interactions, apiKey, userI
         <TabsContent value="interactions" className="mt-6">
           <InteractionListView
             interactions={interactions}
+            apiKey={apiKey}
+          />
+        </TabsContent>
+        <TabsContent value="assessment" className="mt-6">
+          <ComprehensiveAssessmentView
+            projectId={project.id}
             apiKey={apiKey}
           />
         </TabsContent>

@@ -144,3 +144,19 @@ export interface CreateRepositoryRequest {
   repoName: string;
   repoHash: string;
 }
+
+// ============================================================================
+// Comprehensive Assessment
+// ============================================================================
+
+export interface ComprehensiveAssessment {
+  overall_score: number; // 0-100
+  proficiency_level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  bloom_score: number;
+  success_score: number;
+  quality_score: number;
+  efficiency_score: number;
+  bloom_distribution: Record<string, number>; // Bloom level별 작업 수
+  skill_distribution: Record<string, number>; // core_skill별 작업 수
+  task_count: number;
+}

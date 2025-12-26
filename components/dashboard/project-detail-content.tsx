@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon, Trash2, FileBarChart, MessageSquare, FolderTree } from "lucide-react"
+import { ArrowLeft, Sparkles, Clock, FileEdit, Loader2, X, File as FileIcon, Trash2, FileBarChart, MessageSquare, FolderTree, Target } from "lucide-react"
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
@@ -14,6 +14,7 @@ import { DownloadButton } from './download-button'
 import { TopTasksReport } from './top-tasks-report'
 import { InteractionListView } from './interaction-list-view'
 import { WorkTreeGraphView } from './work-tree-graph-view'
+import { ComprehensiveAssessmentView } from './comprehensive-assessment-view'
 import {
   Dialog,
   DialogContent,
@@ -153,7 +154,7 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
 
       {/* 탭 컨텐츠 */}
       <Tabs defaultValue="report" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
           <TabsTrigger value="report" className="flex items-center gap-2">
             <FileBarChart className="h-4 w-4" />
             주요 작업 분석
@@ -165,6 +166,10 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
           <TabsTrigger value="interactions" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             AI 상호작용
+          </TabsTrigger>
+          <TabsTrigger value="assessment" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            종합 평가
           </TabsTrigger>
         </TabsList>
         <TabsContent value="report" className="mt-6">
@@ -183,6 +188,12 @@ export function ProjectDetailContent({ project, interactions, apiKey }: ProjectD
         <TabsContent value="interactions" className="mt-6">
           <InteractionListView
             interactions={interactions}
+            apiKey={apiKey}
+          />
+        </TabsContent>
+        <TabsContent value="assessment" className="mt-6">
+          <ComprehensiveAssessmentView
+            projectId={project.id}
             apiKey={apiKey}
           />
         </TabsContent>
